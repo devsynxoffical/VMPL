@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { registerGsap, ScrollTrigger } from "@/lib/gsap";
+import { gsap, registerGsap } from "@/lib/gsap";
 
 export function useScrollSpy(
   sectionIds: readonly string[],
@@ -42,13 +42,13 @@ export function useScrollSpy(
     update();
     window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
-    ScrollTrigger.addEventListener("scroll", update);
+    gsap.ticker.add(update);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
-      ScrollTrigger.removeEventListener("scroll", update);
+      gsap.ticker.remove(update);
     };
   }, [sectionIds, offsetRatio]);
 
