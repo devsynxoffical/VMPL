@@ -125,8 +125,9 @@ export function VmplClientMark() {
 
     const applyClip = () => {
       const { x, y, r } = pos.current;
-      spot.style.clipPath = `circle(${r}px at ${x}px ${y}px)`;
-      spot.style.webkitClipPath = `circle(${r}px at ${x}px ${y}px)`;
+      const value = `circle(${r}px at ${x}px ${y}px)`;
+      spot.style.clipPath = value;
+      spot.style.setProperty("-webkit-clip-path", value);
     };
 
     // Hidden until hover
