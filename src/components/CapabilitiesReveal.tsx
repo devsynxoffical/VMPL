@@ -1,21 +1,220 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { capabilities } from "@/content";
 import { gsap, registerGsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
+type Chip = (typeof capabilities.chips)[number];
+
+function ChipIcon({ id, large }: { id: Chip["id"]; large?: boolean }) {
+  const size = large ? "h-5 w-5" : "h-3.5 w-3.5";
+  switch (id) {
+    case "systems":
+      return (
+        <svg className={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="6.5" cy="7" r="2.2" stroke="currentColor" strokeWidth="1.9" />
+          <circle cx="17.5" cy="7" r="2.2" stroke="currentColor" strokeWidth="1.9" />
+          <circle cx="12" cy="17" r="2.2" stroke="currentColor" strokeWidth="1.9" />
+          <path
+            d="M8.3 8.4 10.4 15.2M15.7 8.4 13.6 15.2M8.7 7h6.6"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+    case "strategy":
+      return (
+        <svg className={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.9" />
+          <circle cx="12" cy="12" r="2.1" fill="currentColor" />
+          <path
+            d="M12 4v2.2M12 17.8V20M4 12h2.2M17.8 12H20"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+    case "creative":
+      return (
+        <svg className={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M8.5 15.5c-1.8-1.8-2.8-3.7-2.8-5.4A4.3 4.3 0 0 1 10 5.8c1.4 0 2.5.6 3.2 1.6.7-1 1.8-1.6 3.2-1.6a4.3 4.3 0 0 1 4.3 4.3c0 1.7-1 3.6-2.8 5.4L12 20.2l-3.5-4.7Z"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+    case "media":
+      return (
+        <svg className={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <rect x="3.5" y="6" width="17" height="12" rx="2.2" stroke="currentColor" strokeWidth="1.9" />
+          <path d="M10 9.5v5l5-2.5-5-2.5Z" fill="currentColor" />
+        </svg>
+      );
+    case "scale":
+      return (
+        <svg className={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M4.5 16.5 10 11l3.2 3.2L19.5 7.5"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M14.5 7.5h5v5"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
+function ChipGlyph({ id, large }: { id: Chip["id"]; large?: boolean }) {
+  return (
+    <span className={`capa-chip-mark${large ? " is-large" : ""}`} aria-hidden>
+      <ChipIcon id={id} large={large} />
+    </span>
+  );
+}
+
+function CapabilityChip({
+  chip,
+  open,
+  onOpen,
+  onClose,
+}: {
+  chip: Chip;
+  open: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+}) {
+  const panelId = useId();
+  const closeTimer = useRef<number | null>(null);
+
+  const clearClose = () => {
+    if (closeTimer.current) {
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
+  const scheduleClose = () => {
+    clearClose();
+    closeTimer.current = window.setTimeout(() => onClose(), 140);
+  };
+
+  useEffect(() => () => clearClose(), []);
+
+  return (
+    <span
+      className={`capa-chip${open ? " is-open" : ""}`}
+      onMouseEnter={() => {
+        clearClose();
+        onOpen();
+      }}
+      onMouseLeave={scheduleClose}
+    >
+      <button
+        type="button"
+        className="capa-chip-trigger focus-ring"
+        aria-expanded={open}
+        aria-controls={panelId}
+        aria-label={chip.title}
+        onFocus={() => {
+          clearClose();
+          onOpen();
+        }}
+        onBlur={scheduleClose}
+        onClick={() => {
+          clearClose();
+          if (open) onClose();
+          else onOpen();
+        }}
+      >
+        <ChipGlyph id={chip.id} />
+        <span className="capa-chip-chevron" aria-hidden>
+          <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" fill="none">
+            <path
+              d="M2.5 4.5 6 8l3.5-3.5"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </button>
+
+      <span
+        id={panelId}
+        role="tooltip"
+        className="capa-chip-panel"
+        aria-hidden={!open}
+        onMouseEnter={clearClose}
+        onMouseLeave={scheduleClose}
+      >
+        <span className="capa-chip-panel-inner">
+          <ChipGlyph id={chip.id} large />
+          <span className="capa-chip-panel-title">{chip.title}</span>
+          <span className="capa-chip-panel-copy">{chip.copy}</span>
+        </span>
+      </span>
+    </span>
+  );
+}
+
+function LeadWords({ text }: { text: string }) {
+  const parts = text.split(/(\s+)/);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (!part) return null;
+        if (/^\s+$/.test(part)) {
+          return <span key={`s-${i}`}>{part}</span>;
+        }
+        return (
+          <span key={`w-${i}`} data-capa-unit className="capa-word inline">
+            {part}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 export function CapabilitiesReveal() {
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const descRef = useRef<HTMLParagraphElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
+  const leadRef = useRef<HTMLParagraphElement>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
   const reducedMotion = useReducedMotion();
+
+  const chipById = Object.fromEntries(
+    capabilities.chips.map((chip) => [chip.id, chip]),
+  ) as Record<string, Chip>;
 
   useEffect(() => {
     registerGsap();
     const section = sectionRef.current;
-    if (!section || reducedMotion) return;
+    const lead = leadRef.current;
+    if (!section || !lead) return;
+
+    const units = lead.querySelectorAll<HTMLElement>("[data-capa-unit]");
+
+    if (reducedMotion) {
+      gsap.set(units, { opacity: 1 });
+      return;
+    }
 
     const ctx = gsap.context(() => {
       const lines = headingRef.current?.querySelectorAll("[data-line]");
@@ -37,44 +236,19 @@ export function CapabilitiesReveal() {
         );
       }
 
-      if (descRef.current) {
-        gsap.fromTo(
-          descRef.current,
-          { y: 20, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.65,
-            delay: 0.12,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: section,
-              start: "top 76%",
-              toggleActions: "restart none restart none",
-            },
-          },
-        );
-      }
-
-      const items = listRef.current?.querySelectorAll("[data-cap]");
-      if (items?.length) {
-        gsap.fromTo(
-          items,
-          { y: 36, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.7,
-            stagger: 0.12,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: listRef.current,
-              start: "top 85%",
-              toggleActions: "restart none restart none",
-            },
-          },
-        );
-      }
+      // Scroll-scrubbed "writing" reveal: words light up as you scroll
+      gsap.set(units, { opacity: 0.18 });
+      gsap.to(units, {
+        opacity: 1,
+        ease: "none",
+        stagger: 0.12,
+        scrollTrigger: {
+          trigger: lead,
+          start: "top 78%",
+          end: "bottom 32%",
+          scrub: 0.75,
+        },
+      });
     }, section);
 
     return () => ctx.revert();
@@ -84,62 +258,60 @@ export function CapabilitiesReveal() {
     <section
       ref={sectionRef}
       id="capabilities"
-      className="relative z-10 overflow-hidden bg-background px-4 py-[8vw] lg:px-[2vw] lg:py-[6vw]"
+      className="relative z-10 overflow-visible bg-background px-4 py-[12vw] lg:px-[2vw] lg:py-[9vw]"
     >
       <div
-        className="pointer-events-none absolute -right-[8%] top-[10%] h-[50vw] w-[50vw] max-h-[520px] max-w-[520px] rounded-full opacity-70"
+        className="pointer-events-none absolute -right-[8%] top-[8%] h-[50vw] w-[50vw] max-h-[520px] max-w-[520px] rounded-full opacity-70"
         style={{
           background:
-            "radial-gradient(circle, rgba(230,43,118,0.14) 0%, rgba(123,34,141,0.06) 42%, transparent 70%)",
+            "radial-gradient(circle, rgba(230,43,118,0.12) 0%, rgba(123,34,141,0.05) 42%, transparent 70%)",
           filter: "blur(40px)",
         }}
         aria-hidden
       />
 
-      <div className="relative z-10 mx-auto w-full max-w-6xl">
-        <span className="section-label">{capabilities.label}</span>
-
+      <div className="relative z-10 mx-auto flex w-full max-w-[72rem] flex-col items-center text-center">
         <h2
           ref={headingRef}
-          className="text-display mt-5 text-[clamp(2.5rem,6vw,5rem)] font-extrabold leading-[0.95] tracking-tight"
+          className="text-display text-[clamp(3rem,8.5vw,7.5rem)] font-extrabold leading-[0.9] tracking-[-0.045em]"
         >
-          <span className="block overflow-hidden">
-            <span data-line className="block">
-              {capabilities.heading}
+          {capabilities.headingLines.map((line) => (
+            <span key={line} className="block overflow-hidden">
+              <span data-line className="block">
+                {line}
+              </span>
             </span>
-          </span>
+          ))}
         </h2>
 
-        <p
-          ref={descRef}
-          className="mt-6 max-w-[36ch] text-[15px] leading-relaxed text-muted lg:mt-7 lg:max-w-[42ch] lg:text-base"
-        >
-          {capabilities.description}
-        </p>
+        <div className="mt-6 lg:mt-8">
+          <span className="section-label">{capabilities.label}</span>
+        </div>
 
-        <ul
-          ref={listRef}
-          className="mt-14 grid grid-cols-1 gap-0 border-t border-foreground/10 md:mt-16 md:grid-cols-3"
+        <p
+          ref={leadRef}
+          className="capa-lead text-display mt-8 max-w-[28ch] text-center text-[clamp(1.55rem,3.6vw,3.15rem)] font-extrabold leading-[1.18] tracking-[-0.03em] text-foreground sm:max-w-[34ch] lg:mt-10 lg:max-w-[30ch]"
         >
-          {capabilities.items.map((item) => (
-            <li
-              key={item.title}
-              data-cap
-              className="group border-b border-foreground/10 py-8 md:border-b-0 md:border-r md:px-7 md:py-10 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
-            >
-              <span className="text-display text-[13px] font-bold tracking-[0.14em] text-accent">
-                {item.icon}
+          {capabilities.lead.map((part, i) => {
+            if (part.type === "text") {
+              return <LeadWords key={`t-${i}`} text={part.value} />;
+            }
+            const chip = chipById[part.id];
+            if (!chip) return null;
+            return (
+              <span key={chip.id} data-capa-unit className="inline-flex align-middle">
+                <CapabilityChip
+                  chip={chip}
+                  open={openId === chip.id}
+                  onOpen={() => setOpenId(chip.id)}
+                  onClose={() =>
+                    setOpenId((curr) => (curr === chip.id ? null : curr))
+                  }
+                />
               </span>
-              <h3 className="text-display mt-4 text-[clamp(1.65rem,2.8vw,2.35rem)] font-extrabold tracking-tight text-foreground">
-                {item.title}
-              </h3>
-              <p className="mt-3 max-w-[28ch] text-[14px] leading-relaxed text-muted lg:text-[15px]">
-                {item.copy}
-              </p>
-              <div className="mt-6 h-[2px] w-10 origin-left bg-accent transition-transform duration-500 group-hover:scale-x-150" />
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </p>
       </div>
     </section>
   );

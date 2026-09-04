@@ -2,7 +2,7 @@ export const site = {
   name: "Vaishali Media Productions LLC",
   shortName: "VMPL",
   tagline: "Growth Systems. That's Vaishali Media.",
-  email: "hello@vaishalimedia.com",
+  email: "info@vaishalimediaproductionsllc.com",
   bookingLink: "#solutions",
   socials: {
     linkedin: "https://www.linkedin.com/in/vaishali-joshi-milliondollarmedia/",
@@ -10,6 +10,7 @@ export const site = {
   },
 } as const;
 
+/** Order matches page sections top → bottom */
 export const navItems = [
   { id: "hero", label: "Home" },
   { id: "about", label: "About" },
@@ -22,6 +23,8 @@ export const navItems = [
   { id: "faq", label: "FAQ" },
 ] as const;
 
+export const navSectionIds = navItems.map((n) => n.id);
+
 export const hero = {
   eyebrow: site.tagline,
   headline: "We Build What Businesses Need To Grow.",
@@ -31,8 +34,8 @@ export const hero = {
   primaryCta: { label: "Find My Solution", href: "#solutions" },
   secondaryCta: { label: "View Projects", href: "#projects" },
   stats: [
-    { value: "30", suffix: "M+", label: "Spent In Meta Ads" },
-    { value: 13, suffix: "+", label: "Years of Experience" },
+    { value: "50", suffix: "M+", label: "Spent In Meta Ads" },
+    { value: 12, suffix: "+", label: "Years of Experience" },
   ],
   traits: ["Leads", "Funnels", "Ads", "Creative", "Scale"],
   bgText: "VAISHALI",
@@ -93,19 +96,6 @@ export const growthBrands = [
       "AI-powered video and creative production for high-ticket B2B growth.",
     tags: ["Creative", "Media", "Brand"] as const,
   },
-  {
-    name: "Roofing Systems",
-    href: "https://roofingsystems.co/",
-    logo: "/projects-logo/roofingsystem.webp",
-    image: "/projects/roofing.webp",
-    bg: "/projects/bg/roofing.svg",
-    video: "/videos/roofingsystem.mov",
-    badge: "Industry Engine",
-    description: "Growth systems built for roofing businesses.",
-    caseDescription:
-      "Complete roofing client acquisition — ads, funnels, CRM, and booked inspections.",
-    tags: ["Roofing", "Leads", "Systems"] as const,
-  },
 ] as const;
 
 const brandHref = (name: string) =>
@@ -148,14 +138,6 @@ export const solutions = {
       href: brandHref("Million Dollar Media"),
       brand: "Million Dollar Media",
       logo: "/projects-logo/milliondollarmedia.webp",
-    },
-    {
-      title: "I Run A Roofing Business",
-      description: "Explore specialized growth systems built for roofing businesses.",
-      cta: "Explore Roofing Systems",
-      href: brandHref("Roofing Systems"),
-      brand: "Roofing Systems",
-      logo: "/projects-logo/roofingsystem.webp",
     },
   ],
 } as const;
@@ -250,7 +232,7 @@ export const about = {
       fullYear: "2026",
       title: "The Journey Continues",
       teaser:
-        "Seven years in. Five brands. One mission — helping ambitious businesses grow with systems that connect.",
+        "Seven years in. Four brands. One mission — helping ambitious businesses grow with systems that connect.",
       full:
         "Today, Vaishali Media Productions LLC sits at the center of a growing ecosystem. We've worked alongside 8 and 9 figure business owners, award-winning entrepreneurs, and industry leaders — and the best work is still ahead.",
       attribution: "@vaishalimedia",
@@ -292,25 +274,46 @@ export const projectsSection = {
 } as const;
 
 export const capabilities = {
-  label: "Capabilities",
-  heading: "What You Get",
-  description:
-    "Leads, creative, and systems combined — turning growth challenges into connected brands that feel effortless to run.",
-  items: [
+  label: "Capabilities Overview",
+  headingLines: ["What", "You Get?"],
+  /** Large lead copy - glass chips sit between these text segments */
+  lead: [
+    { type: "text", value: "Strategy, precision, and " },
+    { type: "chip", id: "systems" },
+    { type: "text", value: " development combined, turning " },
+    { type: "chip", id: "strategy" },
+    { type: "text", value: " your vision into a powerful " },
+    { type: "chip", id: "creative" },
+    { type: "text", value: " digital experience " },
+    { type: "chip", id: "media" },
+    { type: "text", value: " that feels effortless." },
+    { type: "chip", id: "scale" },
+  ],
+  chips: [
     {
-      icon: "01",
-      title: "Systems",
-      copy: "An ecosystem of brands that plug into each other — so every lead, funnel, and creative piece compounds.",
+      id: "systems",
+      title: "Connected Growth Systems",
+      copy: "An ecosystem of brands that plug into each other, so every lead, funnel, and creative piece compounds.",
     },
     {
-      icon: "02",
-      title: "Strategy",
+      id: "strategy",
+      title: "Clear Growth Strategy",
       copy: "Clear paths from attention to revenue. No disconnected vendors. One growth picture.",
     },
     {
-      icon: "03",
-      title: "Scale",
-      copy: "Ads, creative, and conversion built to grow with you — not restart every quarter.",
+      id: "creative",
+      title: "Creative That Converts",
+      copy: "Attention-getting creative built to drive action, not just look good in a deck.",
+    },
+    {
+      id: "media",
+      title: "Paid Media & Acquisition",
+      copy: "Meta ads and acquisition systems designed for predictable pipeline, not one-off spikes.",
+    },
+    {
+      id: "scale",
+      title: "Built To Scale",
+      copy: "Ads, creative, and conversion built to grow with you, not restart every quarter.",
     },
   ],
 } as const;
@@ -356,15 +359,6 @@ export const testimonials = {
       initials: "VK",
     },
     {
-      headline: "Systems over shortcuts.",
-      quote:
-        "Roofing Systems installed a full acquisition engine — not just ads. Booked inspections went up because the whole journey finally made sense.",
-      name: "Growth Partner",
-      role: "Roofing Systems Co.",
-      href: "https://roofingsystems.co/",
-      initials: "RS",
-    },
-    {
       headline: "Funnels that finally scale.",
       quote:
         "Million Dollar Funnels rebuilt our backend so low-ticket and high-ticket offers work together. Revenue became predictable instead of chaotic.",
@@ -386,7 +380,7 @@ export const team = {
     {
       name: "Vaishali Kapoor",
       role: "Founder",
-      image: "/team/vaishali.jpeg",
+      image: "/vaishali-kapoor.png",
       bio: "Building the vision behind Vaishali Media and the growth brands in the ecosystem.",
     },
     {
@@ -415,7 +409,7 @@ export const statementSection = {
   solidLines: ["Transform Your", "Growth"] as const,
   ghostLines: ["Experience", "Journey"] as const,
   description:
-    "From leads and funnels to ads and creative — Vaishali Media builds connected systems that turn attention into revenue, then keep compounding.",
+    "From leads and funnels to ads and creative, Vaishali Media builds connected systems that turn attention into revenue, then keep compounding.",
   prompt: "Have something in mind?",
   cta: { label: "Let's Talk", href: "#solutions" },
   portrait: "/vaishali-kapoor.png",
@@ -426,6 +420,26 @@ export const faq = {
   displayText: "VMPL",
   label: "FAQ",
   heading: "Got any questions?",
+  /** Client portraits used inside the giant VMPL letter mask + circle scrollers */
+  clientImages: [
+    "/clients/client-pierce.webp",
+    "/clients/client-darrell.jpg",
+    "/clients/client-tim-burd.webp",
+    "/clients/client-marie.jpg",
+    "/clients/client-jesse.webp",
+    "/clients/client-sarah.jpg",
+    "/clients/client-jared.jpg",
+    "/clients/client-jimmy.webp",
+    "/clients/client-mark.jpg",
+    "/clients/client-steven.jpg",
+    "/clients/client-rafael.jpg",
+    "/clients/client-aref.jpg",
+    "/clients/client-dr-amy.webp",
+    "/clients/client-dr-bea.jpg",
+    "/clients/client-mahdi.jpg",
+    "/clients/client-officer-baker.jpg",
+    "/clients/client-travis.webp",
+  ],
   items: [
     {
       question: "What does Vaishali Media Productions actually do?",
@@ -465,7 +479,7 @@ export const faq = {
     {
       question: "Not sure where to start?",
       answer:
-        "Reach out at hello@vaishalimedia.com or use the Find My Solution button. Tell us where you want to grow — we'll help you identify the right entry point in the VMPL ecosystem.",
+        "Reach out at info@vaishalimediaproductionsllc.com or use the Find My Solution button. Tell us where you want to grow — we'll help you identify the right entry point in the VMPL ecosystem.",
     },
   ],
 } as const;

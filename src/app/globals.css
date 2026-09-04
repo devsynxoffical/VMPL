@@ -99,6 +99,24 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
+/* Stronger frosted glass for hero stat cards over the portrait */
+.glass-hero {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.22) 48%,
+    rgba(255, 255, 255, 0.28) 100%
+  );
+  backdrop-filter: blur(28px) saturate(1.45);
+  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(123, 34, 141, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+}
+
 .text-display {
   font-family: var(--font-jakarta), system-ui, sans-serif;
   letter-spacing: -0.03em;
@@ -130,6 +148,50 @@ body {
 .marquee-track:hover,
 .marquee-track-reverse:hover {
   animation-play-state: paused;
+}
+
+/* Small circular client portrait scroller */
+.client-circle-scroller {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+}
+
+.client-circle-item {
+  position: relative;
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  margin-inline: 0.4rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: #ebe4ef;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.9),
+    0 6px 16px rgba(123, 34, 141, 0.12);
+}
+
+@media (min-width: 768px) {
+  .client-circle-item {
+    width: 3.35rem;
+    height: 3.35rem;
+    margin-inline: 0.5rem;
+  }
 }
 
 @keyframes marquee-left {
@@ -240,6 +302,356 @@ body {
   box-shadow: 0 12px 32px rgba(123, 34, 141, 0.34);
 }
 
+.btn-primary:active,
+.btn-secondary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Hero top nav — heynesh-style text swap on hover */
+.hero-nav-link {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  cursor: pointer;
+  vertical-align: top;
+  line-height: 1.15;
+  color: var(--foreground);
+  transition: color 0.25s ease, transform 0.15s ease;
+}
+
+.hero-nav-link .hero-nav-label {
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-nav-link .hero-nav-label-clone {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: var(--accent);
+  transform: translateY(110%);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-nav-link:hover .hero-nav-label,
+.hero-nav-link:focus-visible .hero-nav-label {
+  transform: translateY(-110%);
+}
+
+.hero-nav-link:hover .hero-nav-label-clone,
+.hero-nav-link:focus-visible .hero-nav-label-clone {
+  transform: translateY(0);
+}
+
+.hero-nav-link:active {
+  transform: scale(0.96);
+}
+
+/* Sidebar nav — heynesh-style pills + icon color shift */
+.sidebar-nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.9rem 0.55rem 0.7rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  transition: color 0.25s ease, transform 0.15s ease;
+}
+
+.sidebar-nav-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: #ebe4ef;
+  transition:
+    background-color 0.28s ease,
+    box-shadow 0.28s ease,
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sidebar-nav-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+  transition:
+    color 0.28s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sidebar-nav-label {
+  position: relative;
+  z-index: 1;
+  transition: color 0.25s ease;
+}
+
+.sidebar-nav-link:hover .sidebar-nav-bg,
+.sidebar-nav-link:focus-visible .sidebar-nav-bg {
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(123, 34, 141, 0.1);
+  transform: scale(1.02);
+}
+
+.sidebar-nav-link:hover .sidebar-nav-icon,
+.sidebar-nav-link:focus-visible .sidebar-nav-icon {
+  color: var(--accent);
+  transform: scale(1.12) rotate(-6deg);
+}
+
+.sidebar-nav-link:hover .sidebar-nav-label,
+.sidebar-nav-link:focus-visible .sidebar-nav-label {
+  color: var(--foreground);
+}
+
+.sidebar-nav-link.is-active {
+  color: #fff;
+}
+
+.sidebar-nav-link.is-active .sidebar-nav-bg {
+  background: var(--accent);
+  box-shadow: 0 8px 22px rgba(230, 43, 118, 0.28);
+  transform: scale(1);
+}
+
+.sidebar-nav-link.is-active .sidebar-nav-icon,
+.sidebar-nav-link.is-active .sidebar-nav-label {
+  color: #fff;
+}
+
+.sidebar-nav-link.is-active:hover .sidebar-nav-bg,
+.sidebar-nav-link.is-active:focus-visible .sidebar-nav-bg {
+  background: var(--accent-hover);
+  box-shadow: 0 10px 26px rgba(230, 43, 118, 0.34);
+  transform: scale(1.02);
+}
+
+.sidebar-nav-link.is-active:hover .sidebar-nav-icon,
+.sidebar-nav-link.is-active:focus-visible .sidebar-nav-icon {
+  color: #fff;
+  transform: scale(1.12) rotate(-6deg);
+}
+
+.sidebar-nav-link:active {
+  transform: scale(0.97);
+}
+
+.sidebar-nav-link:active .sidebar-nav-bg {
+  transform: scale(0.98);
+}
+
+/* Capabilities — heynesh-style glass chips + hover panels */
+.capa-lead {
+  position: relative;
+}
+
+.capa-chip {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  margin: 0 0.18em;
+  z-index: 1;
+}
+
+.capa-chip.is-open {
+  z-index: 40;
+}
+
+.capa-chip-trigger {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.15rem;
+  padding: 0.35rem 0.55rem 0.35rem 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow:
+    0 8px 28px rgba(123, 34, 141, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--accent);
+  cursor: pointer;
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.capa-chip-trigger:hover,
+.capa-chip.is-open .capa-chip-trigger {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: rgba(230, 43, 118, 0.28);
+  box-shadow:
+    0 12px 32px rgba(230, 43, 118, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px) scale(1.03);
+}
+
+.capa-chip-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 0.45rem;
+  background: var(--brand-gradient);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.capa-chip-mark.is-large {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 0.55rem;
+}
+
+.capa-chip-chevron {
+  display: inline-flex;
+  color: var(--accent);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.capa-chip.is-open .capa-chip-chevron {
+  transform: rotate(180deg);
+}
+
+.capa-chip-panel {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.65rem);
+  width: min(17.5rem, 72vw);
+  padding-bottom: 0.35rem;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(10px) scale(0.92);
+  transform-origin: bottom center;
+  transition:
+    opacity 0.28s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0.28s ease;
+}
+
+.capa-chip.is-open .capa-chip-panel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.capa-chip-panel-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 1rem 1.05rem 1.1rem;
+  border-radius: 1.15rem;
+  background: #efe8f1;
+  border: 1px solid rgba(123, 34, 141, 0.08);
+  box-shadow:
+    0 18px 50px rgba(40, 10, 45, 0.16),
+    0 2px 0 rgba(255, 255, 255, 0.55) inset;
+}
+
+.capa-chip-panel-inner .capa-chip-mark {
+  width: 2.15rem;
+  height: 2.15rem;
+}
+
+.capa-chip-panel-title {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--foreground);
+}
+
+.capa-chip-panel-copy {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .capa-chip-trigger {
+    min-height: 1.9rem;
+    padding: 0.28rem 0.45rem 0.28rem 0.35rem;
+    border-radius: 0.7rem;
+  }
+
+  .capa-chip-panel {
+  width: min(15.5rem, 78vw);
+}
+}
+
+/* Giant VMPL mark — solid letters + tiny cursor-point image reveal */
+.vmpl-client-mark {
+  position: relative;
+  width: 100%;
+  max-width: min(100%, 100rem);
+  margin-inline: auto;
+  line-height: 0;
+  cursor: crosshair;
+  filter: drop-shadow(0 20px 48px rgba(123, 34, 141, 0.2));
+}
+
+.vmpl-client-base,
+.vmpl-client-spot {
+  width: 100%;
+}
+
+.vmpl-client-spot {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Start fully clipped — JS expands a small circle at the cursor only */
+  clip-path: circle(0px at 50% 50%);
+  -webkit-clip-path: circle(0px at 50% 50%);
+  will-change: clip-path;
+}
+
+.vmpl-client-mark-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  pointer-events: none;
+}
+
+@media (max-width: 768px), (hover: none) {
+  .vmpl-client-mark {
+    cursor: default;
+  }
+
+  /* Touch: keep solid brand letters only (no always-on image fill) */
+  .vmpl-client-spot {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .vmpl-client-mark {
+    filter: drop-shadow(0 12px 28px rgba(123, 34, 141, 0.16));
+  }
+}
+
 .section-label {
   display: inline-flex;
   align-items: center;
@@ -285,9 +697,10 @@ body {
 
 .project-screen video {
   -webkit-appearance: none;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center center;
-  max-width: none;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .journey-dot.lit {

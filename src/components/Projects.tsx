@@ -24,6 +24,57 @@ function ArrowIcon() {
   );
 }
 
+type ProjectItem = (typeof projectsSection.projects)[number];
+
+function ProjectCardMedia({
+  project,
+  videoRef,
+  autoPlay,
+}: {
+  project: ProjectItem;
+  videoRef?: (el: HTMLVideoElement | null) => void;
+  autoPlay?: boolean;
+}) {
+  return (
+    <>
+      {/* Full-bleed atmospheric background */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={project.bg}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/15 to-black/80" />
+      </div>
+
+      {/* Centered device screen — video plays here (fit, no side crop) */}
+      <div className="project-screen pointer-events-none absolute inset-x-[7%] top-[16%] bottom-[22%] z-[5] flex items-center justify-center">
+        <div className="relative h-full w-full overflow-hidden rounded-[1.15rem] border border-white/30 bg-[#0b0b0b] shadow-[0_24px_60px_rgba(0,0,0,0.55)] ring-1 ring-black/40 transition-transform duration-700 ease-out group-hover:scale-[1.02] lg:rounded-[1.35rem]">
+          <video
+            ref={videoRef}
+            data-project-video
+            src={project.video}
+            poster={project.image}
+            className="absolute inset-0 h-full w-full object-contain object-center"
+            muted
+            loop
+            playsInline
+            autoPlay={autoPlay}
+            preload="metadata"
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
+            controlsList="nodownload nofullscreen noremoteplayback"
+            aria-hidden
+            tabIndex={-1}
+          />
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function Projects() {
   const sectionRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
@@ -213,12 +264,12 @@ export function Projects() {
           if (!cards.length) {
             return Math.max(0, track.scrollWidth - viewport.clientWidth);
           }
-          const style = window.getComputedStyle(track);
-          const padRight = parseFloat(style.paddingRight) || 0;
           const last = cards[cards.length - 1];
-          // Prefer offset math — scrollWidth can under-report with transformed tracks
-          const contentEnd = last.offsetLeft + last.offsetWidth + padRight;
-          return Math.max(0, contentEnd - viewport.clientWidth);
+          // Stop when the last card's right edge meets the viewport's right edge
+          // (small breathing room). Do not overscroll into empty black.
+          const target =
+            last.offsetLeft + last.offsetWidth - viewport.clientWidth + 16;
+          return Math.max(0, target);
         };
 
         const syncActive = () => {
@@ -243,26 +294,35 @@ export function Projects() {
         gsap.set(track, { x: 0, force3D: true });
         syncActive();
 
-        // Scroll distance must cover the full track; pin stays until last card.
-        const tween = gsap.to(track, {
-          x: () => -getDistance(),
-          ease: "none",
+        // Hold on card 01 first, then scrub — so early scroll still shows the first card
+        const tween = gsap.timeline({
           scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: () => {
-              const dist = getDistance();
-              // Full track travel + brief settle at start/end
-              return `+=${Math.max(dist * 1.15, dist + window.innerHeight * 0.55)}`;
-            },
+            end: () =>
+              `+=${getDistance() + Math.round(window.innerHeight * 0.55)}`,
             pin: pin,
             pinSpacing: true,
             scrub: 0.55,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onUpdate: syncActive,
-            onRefresh: syncActive,
+            onRefresh: () => {
+              syncActive();
+            },
+            onEnter: () => {
+              if (tween.scrollTrigger && tween.scrollTrigger.progress < 0.02) {
+                gsap.set(track, { x: 0 });
+              }
+            },
           },
+        });
+
+        tween.to({}, { duration: 0.4 });
+        tween.to(track, {
+          x: () => -getDistance(),
+          duration: 1,
+          ease: "none",
         });
 
         const refresh = () => {
@@ -317,14 +377,14 @@ export function Projects() {
   return (
     <section
       ref={sectionRef}
-      id="projects"
       className="relative z-[2] -mt-2 bg-[#050505] text-white"
     >
       <div
         ref={pinRef}
-        className="flex flex-col justify-center py-8 md:min-h-[100svh] lg:py-10"
+        id="projects"
+        className="flex flex-col justify-start gap-8 py-10 md:min-h-[100svh] md:gap-12 md:py-12 lg:gap-14 lg:py-14"
       >
-        <div className="mx-auto w-full max-w-[92rem] px-4 lg:px-[2vw]">
+        <div className="w-full shrink-0 px-4 lg:px-[2vw]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
             <h2
               ref={headingRef}
@@ -347,14 +407,14 @@ export function Projects() {
           </div>
         </div>
 
-        {/* Desktop: pinned horizontal scrub — wider cards for landscape video */}
+        {/* Desktop: pinned horizontal scrub — wide enough that ~2 cards fill the view */}
         <div
           ref={viewportRef}
-          className="relative mt-7 hidden overflow-hidden md:block lg:mt-9"
+          className="relative mt-2 hidden w-full overflow-hidden md:mt-4 md:block"
         >
           <div
             ref={trackRef}
-            className="flex w-max gap-5 will-change-transform pl-[clamp(1.25rem,10vw,8rem)] pr-[clamp(1.25rem,16vw,12rem)] lg:gap-6 lg:pl-[clamp(2rem,12vw,10rem)] lg:pr-[clamp(2rem,18vw,14rem)]"
+            className="flex w-max gap-4 will-change-transform pl-4 pr-10 lg:gap-5 lg:pl-[2vw] lg:pr-[4vw]"
           >
             {projectsSection.projects.map((project, index) => (
               <a
@@ -365,41 +425,24 @@ export function Projects() {
                 href={project.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="project-card focus-ring group relative isolate flex h-[min(46vh,440px)] w-[min(62vw,740px)] shrink-0 flex-col overflow-hidden rounded-[1.5rem] bg-[#111] lg:h-[min(48vh,480px)] lg:w-[min(56vw,780px)] lg:rounded-[1.75rem]"
+                className="project-card focus-ring group relative isolate flex h-[min(58vh,560px)] w-[clamp(320px,46vw,560px)] shrink-0 flex-col overflow-hidden rounded-[1.75rem] bg-[#161616] lg:h-[min(60vh,600px)] lg:w-[clamp(360px,44vw,580px)] lg:rounded-[2rem]"
               >
-                <div className="project-screen absolute inset-0 overflow-hidden">
-                  <video
-                    ref={(el) => {
-                      videoRefs.current[index] = el;
-                    }}
-                    data-project-video
-                    src={project.video}
-                    poster={project.image}
-                    className="pointer-events-none absolute left-1/2 top-1/2 h-full min-h-full w-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    controls={false}
-                    disablePictureInPicture
-                    disableRemotePlayback
-                    controlsList="nodownload nofullscreen noremoteplayback"
-                    aria-hidden
-                    tabIndex={-1}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/15 to-black/85" />
-                  <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black via-black/70 to-transparent" />
-                </div>
+                <ProjectCardMedia
+                  project={project}
+                  videoRef={(el) => {
+                    videoRefs.current[index] = el;
+                  }}
+                />
 
                 <div className="relative z-10 flex items-start justify-between gap-3 p-4 lg:p-5">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/35 text-[12px] font-bold tracking-wide text-white backdrop-blur-sm lg:h-11 lg:w-11 lg:text-[13px]">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 text-[12px] font-bold tracking-wide text-white backdrop-blur-sm lg:h-11 lg:w-11 lg:text-[13px]">
                     {project.index}
                   </span>
                   <div className="flex max-w-[70%] flex-wrap justify-end gap-1.5">
                     {project.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white/90 backdrop-blur-sm lg:text-[11px]"
+                        className="rounded-full border border-white/25 bg-black/35 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white/95 backdrop-blur-sm lg:text-[11px]"
                       >
                         {tag}
                       </span>
@@ -407,9 +450,9 @@ export function Projects() {
                   </div>
                 </div>
 
-                <div className="relative z-10 mt-auto flex items-end justify-between gap-4 p-4 lg:p-5">
+                <div className="relative z-10 mt-auto flex items-end justify-between gap-4 p-5 lg:p-6">
                   <div className="min-w-0 max-w-[78%]">
-                    <h3 className="text-display text-[clamp(1.35rem,2.1vw,1.85rem)] font-extrabold leading-tight tracking-tight text-white">
+                    <h3 className="text-display text-[clamp(1.4rem,2.2vw,1.95rem)] font-extrabold leading-tight tracking-tight text-white">
                       {project.name}
                     </h3>
                     <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-white/70 lg:text-[13px]">
@@ -433,45 +476,28 @@ export function Projects() {
           </div>
         </div>
 
-        {/* Mobile: vertical stack */}
+        {/* Mobile: vertical stack — same card language */}
         <div className="mt-10 flex flex-col gap-5 px-4 md:hidden lg:px-[2vw]">
-          {projectsSection.projects.map((project, index) => (
+          {projectsSection.projects.map((project) => (
             <a
               key={`m-${project.name}`}
               data-mobile-project
               href={project.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="project-card focus-ring group relative isolate flex aspect-[16/10] min-h-0 w-full flex-col overflow-hidden rounded-[1.5rem] bg-[#111]"
+              className="project-card focus-ring group relative isolate flex min-h-[72vh] w-full flex-col overflow-hidden rounded-[1.75rem] bg-[#111]"
             >
-              <div className="project-screen absolute inset-0 overflow-hidden">
-                <video
-                  data-project-video
-                  src={project.video}
-                  poster={project.image}
-                  className="pointer-events-none absolute left-1/2 top-1/2 h-full min-h-full w-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover object-center"
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
-                  controls={false}
-                  disablePictureInPicture
-                  aria-hidden
-                  tabIndex={-1}
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/15 to-black/85" />
-                <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black via-black/70 to-transparent" />
-              </div>
+              <ProjectCardMedia project={project} />
 
               <div className="relative z-10 flex items-start justify-between gap-3 p-4">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/35 text-[12px] font-bold text-white backdrop-blur-sm">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 text-[12px] font-bold text-white backdrop-blur-sm">
                   {project.index}
                 </span>
                 <div className="flex flex-wrap justify-end gap-1.5">
                   {project.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold text-white/90 backdrop-blur-sm"
+                      className="rounded-full border border-white/25 bg-black/35 px-2.5 py-1 text-[10px] font-semibold text-white/95 backdrop-blur-sm"
                     >
                       {tag}
                     </span>

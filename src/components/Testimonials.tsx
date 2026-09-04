@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { testimonials } from "@/content";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { ClientCircleScroller } from "@/components/ClientCircleScroller";
 
 export function Testimonials() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -223,6 +224,10 @@ export function Testimonials() {
             </span>
           </div>
         </div>
+      </div>
+
+      <div className="relative z-10 mt-8 w-full lg:mt-10">
+        <ClientCircleScroller />
       </div>
 
       <div className="relative z-10 mt-10 lg:mt-12">

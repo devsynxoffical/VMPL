@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { navItems, site, hero, projectLogos } from "@/content";
+import { navItems, navSectionIds, site, hero, projectLogos } from "@/content";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { useHeroScroll } from "@/context/HeroScrollContext";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -9,7 +9,7 @@ import { BrandMark } from "@/components/BrandMark";
 import { FacebookIcon, LinkedInIcon } from "@/components/SocialIcons";
 
 function NavIcon({ name }: { name: string }) {
-  const common = "h-3.5 w-3.5 shrink-0";
+  const common = "h-4 w-4 shrink-0";
   switch (name) {
     case "Home":
       return (
@@ -17,7 +17,7 @@ function NavIcon({ name }: { name: string }) {
           <path
             d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.85"
             strokeLinejoin="round"
           />
         </svg>
@@ -25,11 +25,11 @@ function NavIcon({ name }: { name: string }) {
     case "About":
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
-          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.85" />
           <path
-            d="M12 8v.5M12 11v5"
+            d="M5.2 19.2c.9-3.2 3.4-5 6.8-5s5.9 1.8 6.8 5"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.85"
             strokeLinecap="round"
           />
         </svg>
@@ -37,31 +37,31 @@ function NavIcon({ name }: { name: string }) {
     case "Projects":
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
-          <rect x="4" y="5" width="16" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
-          <rect x="4" y="11" width="16" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
-          <rect x="4" y="17" width="16" height="3" rx="1" stroke="currentColor" strokeWidth="1.8" />
+          <rect x="3.5" y="4.5" width="17" height="4" rx="1.2" stroke="currentColor" strokeWidth="1.85" />
+          <rect x="3.5" y="10" width="17" height="4" rx="1.2" stroke="currentColor" strokeWidth="1.85" />
+          <rect x="3.5" y="15.5" width="17" height="4" rx="1.2" stroke="currentColor" strokeWidth="1.85" />
         </svg>
       );
     case "What You Get":
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
           <path
-            d="M12 4 5 8v8l7 4 7-4V8l-7-4Z"
+            d="M12 3.5 4.5 8v8L12 20.5 19.5 16V8L12 3.5Z"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.85"
             strokeLinejoin="round"
           />
-          <path d="M5 8l7 4 7-4M12 12v8" stroke="currentColor" strokeWidth="1.8" />
+          <path d="M4.5 8 12 12.5 19.5 8M12 12.5V20.5" stroke="currentColor" strokeWidth="1.85" />
         </svg>
       );
     case "Clients":
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
-          <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.85" />
           <path
             d="M5.5 19c.8-3 3.3-4.8 6.5-4.8s5.7 1.8 6.5 4.8"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.85"
             strokeLinecap="round"
           />
         </svg>
@@ -72,7 +72,7 @@ function NavIcon({ name }: { name: string }) {
           <path
             d="M13 3 5 14h7l-1 7 8-11h-7l1-7Z"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.85"
             strokeLinejoin="round"
           />
         </svg>
@@ -80,12 +80,12 @@ function NavIcon({ name }: { name: string }) {
     case "Team":
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
-          <circle cx="9" cy="8" r="2.6" stroke="currentColor" strokeWidth="1.8" />
-          <circle cx="16" cy="9" r="2.2" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="9" cy="8" r="2.6" stroke="currentColor" strokeWidth="1.85" />
+          <circle cx="16" cy="9" r="2.2" stroke="currentColor" strokeWidth="1.85" />
           <path
             d="M4.5 19c.7-2.6 2.8-4 5.5-4s4.8 1.4 5.5 4M14 15c1.8.2 3.4 1.2 4.2 3.2"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.85"
             strokeLinecap="round"
           />
         </svg>
@@ -96,7 +96,7 @@ function NavIcon({ name }: { name: string }) {
           <path
             d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4 3.5V16H7.5A2.5 2.5 0 0 1 5 13.5v-7Z"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.85"
             strokeLinejoin="round"
           />
         </svg>
@@ -104,11 +104,11 @@ function NavIcon({ name }: { name: string }) {
     default:
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
-          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.85" />
           <path
             d="M12 16.5v.5M12 8c1.4 0 2.3.8 2.3 2s-.9 1.7-2.1 2.1c-.7.2-1.2.6-1.2 1.4V14"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.85"
             strokeLinecap="round"
           />
         </svg>
@@ -134,7 +134,7 @@ function clamp01(n: number) {
 }
 
 export function SideNav() {
-  const activeId = useScrollSpy(navItems.map((n) => n.id));
+  const activeId = useScrollSpy(navSectionIds);
   const { progress } = useHeroScroll();
   const [copied, setCopied] = useState(false);
 
@@ -256,22 +256,23 @@ export function SideNav() {
           aria-label="Main"
           data-dock="nav"
         >
-          <div className="flex flex-col items-start gap-1.5">
+          <div className="flex flex-col items-start gap-2">
             {navItems.map((item) => {
               const active = activeId === item.id;
               return (
                 <button
                   key={item.id}
+                  type="button"
                   data-dock-nav={item.id}
                   onClick={() => scrollTo(item.id)}
-                  className={`focus-ring inline-flex items-center gap-2 rounded-full px-3 py-2 text-left text-[11px] font-extrabold uppercase tracking-[0.08em] transition-colors ${
-                    active
-                      ? "bg-accent text-white"
-                      : "bg-[#f7f3f8] text-foreground hover:bg-white"
-                  }`}
+                  className={`sidebar-nav-link focus-ring ${active ? "is-active" : ""}`}
+                  aria-current={active ? "page" : undefined}
                 >
-                  <NavIcon name={item.label} />
-                  {item.label}
+                  <span className="sidebar-nav-bg" aria-hidden />
+                  <span className="sidebar-nav-icon">
+                    <NavIcon name={item.label} />
+                  </span>
+                  <span className="sidebar-nav-label">{item.label}</span>
                 </button>
               );
             })}
@@ -295,8 +296,8 @@ export function SideNav() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-[18px] bg-white/70 px-3 py-2">
-          <span className="truncate text-[10px] font-medium text-foreground/80">
+        <div className="flex items-center justify-between gap-2 rounded-[18px] bg-white/70 px-3 py-2">
+          <span className="min-w-0 break-all text-[9px] font-medium leading-snug text-foreground/80 sm:text-[10px]">
             {site.email}
           </span>
           <button

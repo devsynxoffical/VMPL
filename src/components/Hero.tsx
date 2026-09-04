@@ -39,27 +39,19 @@ export function Hero() {
 
     if (reducedMotion) {
       setProgress(1);
+      gsap.set(bgTextRef.current, { opacity: 1, clearProps: "transform" });
+      gsap.set(portraitRef.current, { opacity: 1, visibility: "visible" });
       return;
     }
 
     const mm = gsap.matchMedia();
 
-    mm.add("(min-width: 1024px)", () => {
-      // Portrait + wordmark stay visible — never hide them before ScrollTrigger
-      // records start values (that was making the image stick at opacity 0).
-      gsap.set(portraitRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        filter: "blur(0px)",
-        clearProps: "visibility",
-      });
-      gsap.set(bgTextRef.current, { opacity: 1, scale: 1, x: 0, y: 0 });
-
+    const runIntro = (isDesktop: boolean) => {
+      const wordmark = bgTextRef.current;
       const uiEls = [
-        navRef.current,
-        statsRef.current,
-        traitsRef.current,
+        ...(isDesktop
+          ? [navRef.current, statsRef.current, traitsRef.current]
+          : []),
         headlineRef.current,
         primaryCtaRef.current,
         secondaryCtaRef.current,
@@ -67,10 +59,59 @@ export function Hero() {
         bottomRightRef.current,
       ].filter(Boolean);
 
-      gsap.set(uiEls, { opacity: 0, y: 28 });
+      // Phase 1: only VAISHALI. Portrait + chrome stay fully hidden.
+      gsap.set(portraitRef.current, {
+        opacity: 0,
+        y: 28,
+        scale: 1,
+        visibility: "hidden",
+        filter: "blur(0px)",
+      });
+      gsap.set(portraitBlurRef.current, { opacity: 0 });
+      gsap.set(uiEls, { opacity: 0, y: 28, visibility: "hidden" });
+      gsap.set(wordmark, {
+        opacity: 0,
+        scale: 1.04,
+        x: 0,
+        y: 0,
+        xPercent: 0,
+        force3D: true,
+      });
 
       const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
-      intro.to(uiEls, { opacity: 1, y: 0, duration: 0.7, stagger: 0.05 }, 0.2);
+
+      // 1) VAISHALI appears in place (no slide)
+      intro.to(
+        wordmark,
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.9,
+          ease: "power2.out",
+        },
+        0.15,
+      );
+
+      // 2) Portrait + all other text/UI together — after the heading
+      const heroContent = [portraitRef.current, ...uiEls].filter(Boolean);
+      intro.set(heroContent, { visibility: "visible" }, "+=0.4");
+      intro.to(
+        heroContent,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          stagger: 0.05,
+          ease: "power2.out",
+        },
+        "<",
+      );
+
+      return intro;
+    };
+
+    mm.add("(min-width: 1024px)", () => {
+      const intro = runIntro(true);
 
       let headerMove = { x: -420, y: -80, scale: 0.08 };
 
@@ -79,11 +120,16 @@ export function Hero() {
         const target = document.querySelector<HTMLElement>("[data-dock='header']");
         if (!el || !target) return;
 
-        // Measure dock target at its final layout (ignore parent opacity)
+        // Measure dock at settled transform (ignore intro offset)
         const prevX = Number(gsap.getProperty(el, "x")) || 0;
         const prevY = Number(gsap.getProperty(el, "y")) || 0;
         const prevScale = Number(gsap.getProperty(el, "scale")) || 1;
-        gsap.set(el, { x: 0, y: 0, scale: 1, clearProps: "visibility" });
+        gsap.set(el, {
+          x: 0,
+          y: 0,
+          scale: 1,
+          clearProps: "visibility",
+        });
         const a = el.getBoundingClientRect();
         const b = target.getBoundingClientRect();
         headerMove = {
@@ -91,7 +137,11 @@ export function Hero() {
           y: b.top + b.height / 2 - (a.top + a.height / 2),
           scale: Math.max(0.045, (b.width / a.width) * 0.95),
         };
-        gsap.set(el, { x: prevX, y: prevY, scale: prevScale });
+        gsap.set(el, {
+          x: prevX,
+          y: prevY,
+          scale: prevScale,
+        });
       };
 
       // Dock target exists immediately; measure after layout
@@ -101,10 +151,11 @@ export function Hero() {
         scrollTrigger: {
           trigger: container,
           start: "top top",
-          end: "+=180%",
+          // Keep pin tight so About enters as soon as home UI clears
+          end: "+=105%",
           pin: pin,
           pinSpacing: true,
-          scrub: 0.85,
+          scrub: 0.7,
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onRefresh: cacheHeaderMove,
@@ -123,11 +174,11 @@ export function Hero() {
           filter: "blur(0px)",
         },
         {
-          y: -140,
-          scale: 1.06,
+          y: -160,
+          scale: 1.05,
           opacity: 0,
-          filter: "blur(14px)",
-          duration: 0.5,
+          filter: "blur(16px)",
+          duration: 0.42,
           ease: "power2.inOut",
           immediateRender: false,
         },
@@ -137,39 +188,39 @@ export function Hero() {
         portraitBlurRef.current,
         { opacity: 0, y: 0, scale: 1 },
         {
-          opacity: 0.9,
-          y: -40,
-          scale: 1.1,
+          opacity: 0.75,
+          y: -50,
+          scale: 1.08,
           filter: "blur(28px)",
-          duration: 0.45,
+          duration: 0.35,
           ease: "power2.inOut",
         },
         0.02,
       );
       tl.to(
         headlineRef.current,
-        { y: -180, opacity: 0, duration: 0.4, ease: "power2.in" },
-        0.04,
+        { y: -180, opacity: 0, duration: 0.35, ease: "power2.in" },
+        0.03,
       );
       tl.to(
         [primaryCtaRef.current, secondaryCtaRef.current],
-        { y: -100, opacity: 0, duration: 0.38, ease: "power2.in" },
-        0.06,
+        { y: -100, opacity: 0, duration: 0.32, ease: "power2.in" },
+        0.05,
       );
       tl.to(
         navRef.current,
-        { y: -90, opacity: 0, duration: 0.38, ease: "power2.in" },
-        0.08,
+        { y: -90, opacity: 0, duration: 0.32, ease: "power2.in" },
+        0.06,
       );
       tl.to(
         [statsRef.current, traitsRef.current],
-        { y: -100, opacity: 0, duration: 0.36, ease: "power2.in" },
-        0.07,
+        { y: -100, opacity: 0, duration: 0.3, ease: "power2.in" },
+        0.05,
       );
       tl.to(
         [bottomLeftRef.current, bottomRightRef.current],
-        { y: -55, opacity: 0, duration: 0.3, ease: "power2.in" },
-        0.09,
+        { y: -55, opacity: 0, duration: 0.28, ease: "power2.in" },
+        0.07,
       );
 
       // Phase 2 — giant VAISHALI docks into sidebar header (Flip-style delta)
@@ -180,23 +231,26 @@ export function Hero() {
           x: () => headerMove.x,
           y: () => headerMove.y,
           scale: () => headerMove.scale,
-          duration: 0.55,
+          duration: 0.5,
           ease: "power2.inOut",
         },
-        0.26,
+        0.22,
       );
       tl.to(
         bgTextRef.current,
-        { opacity: 0, duration: 0.1, ease: "none" },
-        0.7,
+        { opacity: 0, duration: 0.08, ease: "none" },
+        0.62,
       );
-      tl.set(bgTextRef.current, { visibility: "hidden" }, 0.78);
+      tl.set(bgTextRef.current, { visibility: "hidden" }, 0.68);
 
+      // Fully clear residual blur so the handoff isn't an empty portrait frame
       tl.to(
         portraitBlurRef.current,
-        { opacity: 0.2, y: -100, duration: 0.35 },
-        0.55,
+        { opacity: 0, y: -120, duration: 0.28, ease: "power2.in" },
+        0.4,
       );
+      tl.set(portraitRef.current, { visibility: "hidden" }, 0.72);
+      tl.set(portraitBlurRef.current, { visibility: "hidden" }, 0.72);
 
       requestAnimationFrame(() => {
         cacheHeaderMove();
@@ -211,6 +265,7 @@ export function Hero() {
     });
 
     mm.add("(max-width: 1023px)", () => {
+      const intro = runIntro(false);
       const mobileUi = [
         headlineRef.current,
         primaryCtaRef.current,
@@ -218,20 +273,6 @@ export function Hero() {
         bottomLeftRef.current,
         bottomRightRef.current,
       ].filter(Boolean);
-
-      gsap.set(portraitRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        filter: "blur(0px)",
-      });
-      gsap.set(bgTextRef.current, { opacity: 1, y: 0, scale: 1 });
-      gsap.set(mobileUi, { opacity: 0, y: 28 });
-
-      const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
-      intro
-        .to(bgTextRef.current, { opacity: 1, duration: 0.5 }, 0)
-        .to(mobileUi, { opacity: 1, y: 0, duration: 0.7, stagger: 0.07 }, 0.15);
 
       // Soft parallax exit — no pin (keeps native mobile scroll smooth)
       const tl = gsap.timeline({
@@ -266,19 +307,21 @@ export function Hero() {
   }, [reducedMotion, setProgress]);
 
   return (
-    <div ref={containerRef} id="hero" className="relative">
+    <div ref={containerRef} className="relative">
       <div
         ref={pinRef}
-        className="relative flex h-screen w-full flex-col overflow-visible bg-background"
+        id="hero"
+        className="relative flex h-screen w-full flex-col overflow-x-clip overflow-y-visible bg-background"
       >
-        {/* VAISHALI — giant background wordmark (docks into sidebar header) */}
+        {/* VAISHALI — appears first in place; portrait + chrome follow */}
         <div
           ref={bgTextRef}
           className="text-display brand-gradient-text pointer-events-none absolute inset-x-0 top-[2%] z-[1] select-none px-[0.5%] text-center text-[clamp(4.5rem,20vw,20rem)] font-extrabold leading-none tracking-[-0.04em] will-change-transform"
+          style={{ opacity: 0 }}
           aria-hidden
         >
           {hero.bgText}
-          <sup className="ml-1 align-super text-[0.12em] font-bold leading-none">
+          <sup className="ml-1 inline-block align-super text-[0.12em] font-bold leading-none">
             ®
           </sup>
         </div>
@@ -302,7 +345,7 @@ export function Hero() {
         {/* Nav BELOW VAISHALI */}
         <nav
           ref={navRef}
-          className="absolute inset-x-0 top-[calc(2%+clamp(4.5rem,20vw,20rem)+0.35rem)] z-[50] hidden lg:block"
+          className="pointer-events-auto absolute inset-x-0 top-[calc(2%+clamp(4.5rem,20vw,20rem)+0.35rem)] z-[50] hidden lg:block"
           aria-label="Hero navigation"
         >
           <div className="mx-auto flex w-full max-w-[96rem] items-center justify-between gap-8 px-[5%]">
@@ -314,20 +357,24 @@ export function Hero() {
                       ref={(el) => {
                         sepRefs.current[i - 1] = el;
                       }}
-                      className="mx-3 text-[14px] font-bold leading-none text-foreground xl:mx-3.5"
+                      className="mx-3 text-[14px] font-bold leading-none text-foreground/35 xl:mx-3.5"
                       aria-hidden
                     >
                       |
                     </span>
                   )}
                   <button
+                    type="button"
                     ref={(el) => {
                       navBtnRefs.current[i] = el;
                     }}
                     onClick={() => scrollTo(item.id)}
-                    className="focus-ring text-[13px] font-bold uppercase leading-none tracking-[0.12em] text-foreground will-change-transform xl:text-[14px]"
+                    className="hero-nav-link focus-ring text-[13px] font-bold uppercase tracking-[0.12em] will-change-transform xl:text-[14px]"
                   >
-                    {item.label}
+                    <span className="hero-nav-label">{item.label}</span>
+                    <span className="hero-nav-label-clone" aria-hidden>
+                      {item.label}
+                    </span>
                   </button>
                 </span>
               ))}
@@ -343,20 +390,24 @@ export function Hero() {
                         ref={(el) => {
                           sepRefs.current[idx - 1] = el;
                         }}
-                        className="mx-3 text-[14px] font-bold leading-none text-foreground xl:mx-3.5"
+                        className="mx-3 text-[14px] font-bold leading-none text-foreground/35 xl:mx-3.5"
                         aria-hidden
                       >
                         |
                       </span>
                     )}
                     <button
+                      type="button"
                       ref={(el) => {
                         navBtnRefs.current[idx] = el;
                       }}
                       onClick={() => scrollTo(item.id)}
-                      className="focus-ring text-[13px] font-bold uppercase leading-none tracking-[0.12em] text-foreground will-change-transform xl:text-[14px]"
+                      className="hero-nav-link focus-ring text-[13px] font-bold uppercase tracking-[0.12em] will-change-transform xl:text-[14px]"
                     >
-                      {item.label}
+                      <span className="hero-nav-label">{item.label}</span>
+                      <span className="hero-nav-label-clone" aria-hidden>
+                        {item.label}
+                      </span>
                     </button>
                   </span>
                 );
@@ -368,9 +419,9 @@ export function Hero() {
         {/* Left overlay cards — frosted glass */}
         <div
           ref={statsRef}
-          className="absolute left-[3%] top-[58%] z-[35] hidden flex-col gap-3.5 will-change-transform lg:flex xl:left-[4.5%]"
+          className="absolute left-[12%] top-[58%] z-[35] hidden flex-col gap-3.5 will-change-transform lg:flex xl:left-[14%]"
         >
-          <div className="glass-overlay flex items-center gap-3 rounded-[22px] px-4 py-3.5">
+          <div className="glass-hero flex items-center gap-3 rounded-[22px] px-4 py-3.5">
             <BrandLogo variant="mark" className="h-9 w-9 shrink-0" />
             <div className="leading-tight">
               <div className="text-display text-xl font-extrabold tracking-tight text-accent">
@@ -382,7 +433,7 @@ export function Hero() {
               </div>
             </div>
           </div>
-          <div className="glass-overlay ml-5 rounded-[22px] px-5 py-4">
+          <div className="glass-hero ml-5 rounded-[22px] px-5 py-4">
             <div className="text-display text-[2.65rem] font-extrabold leading-none tracking-tight text-accent">
               {hero.stats[1].value}
               {hero.stats[1].suffix}
@@ -397,7 +448,7 @@ export function Hero() {
 
         <div
           ref={traitsRef}
-          className="absolute right-[3%] top-[58%] z-[35] hidden will-change-transform lg:block xl:right-[4.5%]"
+          className="absolute right-[12%] top-[58%] z-[35] hidden will-change-transform lg:block xl:right-[14%]"
         >
           <div className="glass-overlay rounded-[26px] px-5 py-4">
             <ul className="space-y-3">
@@ -417,7 +468,8 @@ export function Hero() {
         {/* Portrait */}
         <div
           ref={portraitRef}
-          className="pointer-events-none absolute bottom-0 left-1/2 top-[8%] z-20 w-[min(92vw,780px)] -translate-x-1/2 will-change-transform sm:top-[5%] lg:top-[3%] lg:w-[min(58vw,780px)]"
+          className="pointer-events-none absolute bottom-0 left-1/2 top-[8%] z-20 w-[min(92vw,780px)] -translate-x-1/2 opacity-0 will-change-transform sm:top-[5%] lg:top-[3%] lg:w-[min(58vw,780px)]"
+          style={{ visibility: "hidden" }}
         >
           <div className="relative h-full w-full">
             <Image

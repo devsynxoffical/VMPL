@@ -5,8 +5,9 @@ import { BrandMark } from "@/components/BrandMark";
 import { RevealOnScroll } from "@/components/SmoothScroll";
 
 const colSpan = (index: number) => {
-  if (index < 3) return "lg:col-span-2";
-  return "lg:col-span-3";
+  // Staggered 2×2: big + small, then small + big
+  if (index % 4 === 0 || index % 4 === 3) return "lg:col-span-4";
+  return "lg:col-span-2";
 };
 
 export function Solutions() {

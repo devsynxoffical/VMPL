@@ -611,7 +611,7 @@ export function AboutJourney() {
     <section
       ref={sectionRef}
       id="about"
-      className="relative z-[1] overflow-x-hidden bg-background pb-[10vw] pt-[3vw] lg:pb-[8vw] lg:pt-[2.5vw]"
+      className="relative z-[2] -mt-[min(28vh,240px)] overflow-x-hidden bg-background pb-[10vw] pt-[min(10vh,5vw)] lg:-mt-[min(32vh,280px)] lg:pb-[8vw] lg:pt-[4vw]"
     >
       <div
         ref={blobRef}

@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { navItems, site } from "@/content";
+import { navItems, navSectionIds, site } from "@/content";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { BrandLogo } from "@/components/BrandLogo";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
-  const activeId = useScrollSpy(navItems.map((n) => n.id));
+  const activeId = useScrollSpy(navSectionIds);
 
   useEffect(() => {
     if (!open) return;
@@ -94,7 +94,7 @@ export function MobileNav() {
 }
 
 export function HeroNav() {
-  const activeId = useScrollSpy(navItems.map((n) => n.id));
+  const activeId = useScrollSpy(navSectionIds);
   const leftNav = navItems.slice(0, 4);
   const rightNav = navItems.slice(4);
 
