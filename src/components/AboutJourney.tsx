@@ -1,12 +1,66 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { about } from "@/content";
 import { gsap, registerGsap, ScrollTrigger, debouncedScrollRefresh } from "@/lib/gsap";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { BrandLogo } from "@/components/BrandLogo";
+import { AboutTimelineSvg } from "@/components/AboutTimelineSvg";
 
-type Anchor = { x: number; y: number; len: number };
+const VB = { w: 1118, h: 2166 };
+
+/** Dot positions on the winding path (viewBox coords) */
+const NODES = [
+  { x: 1111.09, y: 6.5, side: "right" as const },
+  { x: 186.086, y: 341.5, side: "left" as const },
+  { x: 105.086, y: 739.5, side: "left" as const },
+  { x: 998.086, y: 1092.5, side: "right" as const },
+  { x: 582.086, y: 1482.5, side: "left" as const },
+  { x: 59.086, y: 1766.5, side: "left" as const },
+  { x: 458.086, y: 2129.5, side: "left" as const },
+];
+
+const REVEAL_AT = [0.02, 0.14, 0.28, 0.42, 0.56, 0.7, 0.84];
+
+const CARD_STARTS = [
+  "-45% top",
+  "-22% top",
+  "-4% top",
+  "11% top",
+  "20% top",
+  "36% top",
+  "58% top",
+] as const;
+
+function splitCopy(text: string) {
+  const words = text.split(" ");
+  if (words.length < 6) return [text];
+  const mid = Math.ceil(words.length * 0.55);
+  return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")];
+}
+
+/** Pin each card beside its path node — container must match SVG aspect */
+function nodeStyle(index: number): CSSProperties {
+  const node = NODES[index];
+  const top = `${(node.y / VB.h) * 100}%`;
+  const x = (node.x / VB.w) * 100;
+  const last = index === NODES.length - 1;
+
+  if (node.side === "right") {
+    return {
+      top,
+      right: `calc(${100 - x}% - 2px)`,
+      transform: index === 0 ? "translateY(4px)" : "translateY(-18%)",
+    };
+  }
+
+  return {
+    top,
+    left: `calc(${x}% - 2px)`,
+    // Last card grows upward so it stays inside the path box
+    transform: last ? "translateY(-92%)" : "translateY(-18%)",
+  };
+}
 
 function yearNumber(fullYear: string) {
   return Number(fullYear.slice(2));
@@ -16,343 +70,543 @@ function formatYear(n: number) {
   return `'${String(Math.round(n)).padStart(2, "0")}`;
 }
 
-const CARD_OFFSETS = [
-  "",
-  "md:translate-y-24",
-  "md:translate-y-8",
-  "md:translate-y-28",
-  "md:translate-y-4",
-  "md:translate-y-20",
-  "md:translate-y-12",
-];
+type CardProps = {
+  index: number;
+  open: boolean;
+  onToggle: () => void;
+  cardRef: (el: HTMLDivElement | null) => void;
+  yearRef: (el: HTMLDivElement | null) => void;
+  wrapRef: (el: HTMLElement | null) => void;
+};
+
+function JourneyCard({
+  index,
+  open,
+  onToggle,
+  cardRef,
+  yearRef,
+  wrapRef,
+}: CardProps) {
+  const entry = about.timeline[index];
+  const isRight = NODES[index].side === "right";
+
+  return (
+    <article
+      ref={wrapRef}
+      data-side={isRight ? "right" : "left"}
+      className="about-card-wrap z-[6] flex w-max max-w-[min(100%,380px)] items-end gap-2.5 md:absolute md:gap-3"
+      style={nodeStyle(index)}
+    >
+      {!isRight && (
+        <div className="about-card-point-wrap relative hidden shrink-0 md:block">
+          <div className="about-card-point-line" />
+        </div>
+      )}
+
+      <div
+        ref={cardRef}
+        className={`journey-card-anim relative shrink-0 border p-4 shadow-[0_10px_30px_rgba(0,0,0,0.04)] backdrop-blur-[10px] transition-[background,border-color,box-shadow,color] duration-300 md:p-5 ${
+          open
+            ? "overflow-hidden rounded-[1.15rem] border-white/35 bg-[linear-gradient(201deg,#3b2a42_0%,#1a121e_48%,#2a1d30_98%)] text-white shadow-[0_35px_70px_rgba(0,0,0,0.45)]"
+            : "rounded-[0.95rem] border-white/30 bg-[rgba(247,244,248,0.94)]"
+        }`}
+        style={{ width: "min(calc(100vw - 2.5rem), clamp(240px, 24vw, 360px))" }}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div
+            ref={yearRef}
+            data-anim="year"
+            data-expanded={open ? "true" : "false"}
+            className={`text-display font-extrabold leading-none tracking-[-0.04em] ${
+              open
+                ? "bg-[linear-gradient(180deg,#ff8fbf,#e62b76)] bg-clip-text text-transparent"
+                : "text-accent"
+            }`}
+            style={{ fontSize: "clamp(2.35rem, 4.2vw, 4.25rem)" }}
+          >
+            {open ? entry.fullYear : entry.year}
+          </div>
+          {open && (
+            <button
+              type="button"
+              onClick={onToggle}
+              className="focus-ring mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-white/15 text-white transition hover:bg-accent hover:text-white"
+              aria-label="Close"
+            >
+              <span className="relative block h-3.5 w-3.5">
+                <span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rotate-45 rounded bg-current" />
+                <span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 -rotate-45 rounded bg-current" />
+              </span>
+            </button>
+          )}
+        </div>
+
+        <h3
+          className={`text-display mt-2 font-bold leading-[1.1] tracking-tight ${
+            open ? "text-white" : "text-foreground"
+          }`}
+          style={{ fontSize: "clamp(1.05rem, 1.67vw, 2.1rem)" }}
+        >
+          {splitCopy(entry.title).map((line) => (
+            <span key={line} className="journey-split">
+              <span data-anim="title-line" className="journey-split-line">
+                {line}
+              </span>
+            </span>
+          ))}
+        </h3>
+
+        {!open && (
+          <p
+            className="mt-2 leading-relaxed text-muted"
+            style={{ fontSize: "clamp(0.8rem, 0.95vw, 1.05rem)" }}
+          >
+            {splitCopy(entry.teaser).map((line) => (
+              <span key={line} className="journey-split">
+                <span data-anim="teaser-line" className="journey-split-line">
+                  {line}
+                </span>
+              </span>
+            ))}
+          </p>
+        )}
+
+        {open && (
+          <p
+            className="mt-4 max-w-[42ch] leading-relaxed text-white/80"
+            style={{ fontSize: "clamp(0.9rem, 1.05vw, 1.2rem)" }}
+          >
+            {entry.full}
+          </p>
+        )}
+
+        <div
+          className={`mt-[clamp(0.9rem,1.39vw,1.5rem)] flex items-end justify-between gap-3 ${
+            open ? "border-t border-white/15 pt-4" : "border-t border-foreground/8 pt-3"
+          }`}
+        >
+          <div data-anim="meta" className="flex min-w-0 items-center gap-[clamp(0.5rem,0.97vw,0.85rem)] overflow-hidden">
+            <span data-anim="logo" className="inline-flex origin-bottom">
+              <BrandLogo variant="mark" className="h-[clamp(2rem,3vw,2.75rem)] w-[clamp(2rem,3vw,2.75rem)] shrink-0" />
+            </span>
+            <p
+              className={`leading-snug ${open ? "text-white/65" : "text-muted"}`}
+              style={{ fontSize: "clamp(0.7rem, 0.85vw, 0.95rem)" }}
+            >
+              <span className={`font-semibold ${open ? "text-white" : "text-foreground"}`}>
+                {entry.attribution}
+              </span>
+              <br />
+              {entry.timeAgo}
+            </p>
+          </div>
+          {!open && (
+            <button
+              data-anim="cta"
+              type="button"
+              onClick={onToggle}
+              className="focus-ring shrink-0 rounded-[clamp(0.5rem,0.83vw,0.85rem)] border border-foreground/15 bg-[#ebe4ef] px-[clamp(0.85rem,1.39vw,1.25rem)] py-[clamp(0.45rem,0.69vw,0.65rem)] text-[clamp(0.7rem,0.9vw,0.95rem)] font-medium transition-colors hover:bg-accent hover:text-white"
+              aria-expanded={open}
+            >
+              Read more
+            </button>
+          )}
+        </div>
+      </div>
+
+      {isRight && (
+        <div className="about-card-point-wrap relative hidden shrink-0 md:block">
+          <div className="about-card-point-line" />
+        </div>
+      )}
+    </article>
+  );
+}
 
 export function AboutJourney() {
   const sectionRef = useRef<HTMLElement>(null);
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<SVGPathElement>(null);
-  const tailRef = useRef<SVGPathElement>(null);
-  const dotsRef = useRef<SVGGElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
-  const cardRefs = useRef<(HTMLElement | null)[]>([]);
-  const animRefs = useRef<(HTMLElement | null)[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const overflowRef = useRef<HTMLDivElement>(null);
   const blobRef = useRef<HTMLDivElement>(null);
-  const anchorsRef = useRef<Anchor[]>([]);
-  const pathLengthRef = useRef(0);
-  const drawTweenRef = useRef<gsap.core.Tween | null>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const introRef = useRef<HTMLParagraphElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const yearRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const wrapRefs = useRef<(HTMLElement | null)[]>([]);
+  const revealedRef = useRef<boolean[]>(about.timeline.map(() => false));
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const reducedMotion = useReducedMotion();
-
-  const syncCards = useCallback((drawn: number) => {
-    const pathLength = pathLengthRef.current;
-    if (!pathLength) return;
-
-    animRefs.current.forEach((shell, index) => {
-      if (!shell) return;
-      const anchor = anchorsRef.current[index];
-      if (!anchor) return;
-
-      const yearEl = shell.querySelector<HTMLElement>('[data-anim="year"]');
-      const entry = about.timeline[index];
-      const targetYear = yearNumber(entry.fullYear);
-
-      const prevLen = index === 0 ? 0 : (anchorsRef.current[index - 1]?.len ?? 0);
-      const segmentLen = Math.max(64, anchor.len - prevLen);
-      const segmentStart = anchor.len - segmentLen;
-
-      // Full card once the line reaches its dot; reveal during the approach segment
-      const dotReached = drawn >= anchor.len - 6;
-      const cardProgress = dotReached
-        ? 1
-        : Math.min(1, Math.max(0, (drawn - segmentStart) / segmentLen));
-
-      gsap.set(shell, {
-        opacity: cardProgress,
-        y: 48 * (1 - cardProgress),
-      });
-
-      if (yearEl && yearEl.dataset.expanded !== "true") {
-        yearEl.textContent =
-          cardProgress >= 0.99
-            ? entry.year
-            : formatYear(targetYear * cardProgress);
-      }
-    });
-  }, []);
-
-  const updateDots = useCallback(
-    (progress: number) => {
-      const line = lineRef.current;
-      const tail = tailRef.current;
-      const dotsG = dotsRef.current;
-      const pathLength = pathLengthRef.current;
-      if (!pathLength) return;
-
-      const p = Math.min(1, Math.max(0, progress));
-      const drawn = pathLength * p;
-
-      if (line) {
-        line.style.strokeDasharray = `${pathLength}`;
-        line.style.strokeDashoffset = `${pathLength - drawn}`;
-      }
-
-      const dots = dotsG ? [...dotsG.querySelectorAll(".journey-dot")] : [];
-      anchorsRef.current.forEach((a, i) => {
-        dots[i]?.classList.toggle("lit", drawn >= a.len - 4);
-      });
-
-      if (tail) {
-        const lastLen = anchorsRef.current.at(-1)?.len ?? pathLength;
-        tail.style.opacity = drawn >= lastLen - 6 ? "0.55" : "0";
-      }
-
-      syncCards(drawn);
-    },
-    [syncCards],
-  );
-
-  const buildPath = useCallback(() => {
-    const timeline = timelineRef.current;
-    const svg = svgRef.current;
-    const line = lineRef.current;
-    const tail = tailRef.current;
-    const dotsG = dotsRef.current;
-    if (!timeline || !svg || !line || !tail || !dotsG) return;
-
-    const cards = cardRefs.current.filter(Boolean) as HTMLElement[];
-    if (!cards.length) return;
-
-    const tRect = timeline.getBoundingClientRect();
-    const w = tRect.width;
-    svg.setAttribute("viewBox", `0 0 ${w} ${tRect.height}`);
-
-    const isDesktop = window.innerWidth >= 768;
-    const midX = w * 0.5;
-
-    const anchors: Anchor[] = cards.map((card) => {
-      const r = card.getBoundingClientRect();
-      const isRight = card.dataset.side === "right";
-      const y = r.top + r.height * 0.38 - tRect.top;
-      const x = isDesktop
-        ? isRight
-          ? r.left - tRect.left - 24
-          : r.right - tRect.left + 24
-        : midX;
-      return { x, y, len: 0 };
-    });
-
-    const first = anchors[0];
-    const leadStart = { x: midX, y: 8 };
-
-    // Drop-in from top center so the first segment is visible above card 1
-    let d = `M ${leadStart.x} ${leadStart.y}`;
-    d += ` C ${leadStart.x} ${leadStart.y + Math.max(32, first.y * 0.28)}, ${first.x} ${first.y - Math.max(40, first.y * 0.2)}, ${first.x} ${first.y}`;
-
-    for (let i = 1; i < anchors.length; i++) {
-      const a = anchors[i - 1];
-      const b = anchors[i];
-      const midY = (a.y + b.y) / 2;
-      const amp = w * 0.16 * (b.x >= a.x ? 1 : -1);
-
-      d += ` C ${a.x} ${a.y + (midY - a.y) * 0.4}, ${midX + amp} ${midY - 24}, ${midX} ${midY}`;
-      d += ` C ${midX - amp} ${midY + 24}, ${b.x} ${b.y - (b.y - midY) * 0.4}, ${b.x} ${b.y}`;
-    }
-    line.setAttribute("d", d);
-
-    const last = anchors[anchors.length - 1];
-    const prev = anchors[anchors.length - 2] ?? last;
-    const dir = last.x >= prev.x ? 1 : -1;
-    tail.setAttribute(
-      "d",
-      `M ${last.x} ${last.y} c ${dir * 55} 40, ${dir * 120} 78, ${dir * 170} 120`,
-    );
-    tail.style.opacity = "0";
-
-    dotsG.innerHTML = anchors
-      .map(
-        (a) =>
-          `<circle class="journey-dot" cx="${a.x}" cy="${a.y}" r="6.5"></circle>`,
-      )
-      .join("");
-
-    const pathLength = line.getTotalLength();
-    pathLengthRef.current = pathLength;
-    gsap.set(line, {
-      strokeDasharray: pathLength,
-      strokeDashoffset: pathLength,
-    });
-
-    const samples = 600;
-    anchors.forEach((a) => {
-      let best = Infinity;
-      let bestLen = 0;
-      for (let s = 0; s <= samples; s++) {
-        const len = (s / samples) * pathLength;
-        const p = line.getPointAtLength(len);
-        const dist = Math.hypot(p.x - a.x, p.y - a.y);
-        if (dist < best) {
-          best = dist;
-          bestLen = len;
-        }
-      }
-      a.len = bestLen;
-    });
-
-    anchorsRef.current = anchors;
-  }, []);
-
-  const setupDraw = useCallback(() => {
-    const timeline = timelineRef.current;
-    const line = lineRef.current;
-    if (!timeline || !line) return;
-
-    drawTweenRef.current?.scrollTrigger?.kill();
-    drawTweenRef.current?.kill();
-    drawTweenRef.current = null;
-
-    const pathLength = pathLengthRef.current;
-    if (!pathLength) return;
-
-    if (reducedMotion) {
-      gsap.set(line, { strokeDashoffset: 0 });
-      updateDots(1);
-      animRefs.current.forEach((shell) => {
-        if (shell) gsap.set(shell, { opacity: 1, y: 0 });
-      });
-      return;
-    }
-
-    gsap.set(line, {
-      strokeDasharray: pathLength,
-      strokeDashoffset: pathLength,
-    });
-
-    const cards = cardRefs.current.filter(Boolean) as HTMLElement[];
-    const lastCard = cards.at(-1);
-
-    drawTweenRef.current = gsap.to(line, {
-      strokeDashoffset: 0,
-      ease: "none",
-      scrollTrigger: {
-        trigger: timeline,
-        start: "top 78%",
-        endTrigger: lastCard ?? timeline,
-        end: lastCard ? "bottom 72%" : "bottom 15%",
-        scrub: 0.5,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const lastLen =
-            anchorsRef.current.at(-1)?.len ?? pathLengthRef.current;
-          // Map scroll progress so 1 = line fully at the last card dot
-          const normalized = self.progress * (lastLen / pathLength);
-          updateDots(normalized);
-        },
-        onRefresh: (self) => {
-          const lastLen =
-            anchorsRef.current.at(-1)?.len ?? pathLengthRef.current;
-          updateDots(self.progress * (lastLen / pathLength));
-        },
-      },
-    });
-
-    const st = drawTweenRef.current.scrollTrigger;
-    if (st) {
-      const lastLen = anchorsRef.current.at(-1)?.len ?? pathLength;
-      updateDots(st.progress * (lastLen / pathLength));
-    }
-  }, [reducedMotion, updateDots]);
-
-  const rebuild = useCallback(() => {
-    buildPath();
-    setupDraw();
-    debouncedScrollRefresh(120)();
-    const st = drawTweenRef.current?.scrollTrigger;
-    if (st) {
-      const lastLen =
-        anchorsRef.current.at(-1)?.len ?? pathLengthRef.current;
-      updateDots(st.progress * (lastLen / pathLengthRef.current));
-    }
-  }, [buildPath, setupDraw, updateDots]);
 
   useEffect(() => {
     registerGsap();
     const section = sectionRef.current;
-    if (!section) return;
+    const container = containerRef.current;
+    const overflow = overflowRef.current;
+    if (!section || !container || !overflow) return;
 
-    const onGlobalRefresh = () => {
-      const st = drawTweenRef.current?.scrollTrigger;
-      if (st) {
-        const lastLen =
-          anchorsRef.current.at(-1)?.len ?? pathLengthRef.current;
-        updateDots(st.progress * (lastLen / pathLengthRef.current));
+    const showCardFinal = (index: number) => {
+      const card = cardRefs.current[index];
+      if (!card) return;
+      const yearEl = yearRefs.current[index];
+      const wrap = wrapRefs.current[index];
+      const entry = about.timeline[index];
+      const line = wrap?.querySelector<HTMLElement>(".about-card-point-line");
+      const titleLines = card.querySelectorAll<HTMLElement>("[data-anim='title-line']");
+      const teaserLines = card.querySelectorAll<HTMLElement>("[data-anim='teaser-line']");
+      const meta = card.querySelector<HTMLElement>("[data-anim='meta']");
+      const logo = card.querySelector<HTMLElement>("[data-anim='logo']");
+      const cta = card.querySelector<HTMLElement>("[data-anim='cta']");
+
+      gsap.set(card, { yPercent: 0, opacity: 1, scale: 1, clearProps: "filter" });
+      gsap.set(titleLines, { yPercent: 0, clearProps: "transform" });
+      gsap.set(teaserLines, { yPercent: 0, clearProps: "transform" });
+      if (meta) gsap.set(meta, { yPercent: 0, clearProps: "transform" });
+      if (logo) gsap.set(logo, { yPercent: 0, opacity: 1, scale: 1 });
+      if (cta) gsap.set(cta, { opacity: 1 });
+      if (line) gsap.set(line, { clipPath: "inset(0% 0% 0% 0%)" });
+      if (yearEl && yearEl.dataset.expanded !== "true") {
+        yearEl.textContent = entry.year;
+      }
+      revealedRef.current[index] = true;
+    };
+
+    const playCard = (index: number, reversed = false) => {
+      const card = cardRefs.current[index];
+      if (!card) return;
+      if (!reversed && revealedRef.current[index]) return;
+      if (reversed && !revealedRef.current[index]) return;
+      if (reversed) revealedRef.current[index] = false;
+      else revealedRef.current[index] = true;
+
+      const yearEl = yearRefs.current[index];
+      const wrap = wrapRefs.current[index];
+      const entry = about.timeline[index];
+      const target = yearNumber(entry.fullYear);
+      const line = wrap?.querySelector<HTMLElement>(".about-card-point-line");
+      const titleLines = card.querySelectorAll<HTMLElement>("[data-anim='title-line']");
+      const teaserLines = card.querySelectorAll<HTMLElement>("[data-anim='teaser-line']");
+      const meta = card.querySelector<HTMLElement>("[data-anim='meta']");
+      const logo = card.querySelector<HTMLElement>("[data-anim='logo']");
+      const cta = card.querySelector<HTMLElement>("[data-anim='cta']");
+
+      if (reversed) {
+        gsap.set(card, { yPercent: 10, opacity: 0, scale: 0.6, transformOrigin: "50% 100%" });
+        gsap.set(titleLines, { yPercent: 100 });
+        gsap.set(teaserLines, { yPercent: 100 });
+        if (meta) gsap.set(meta, { yPercent: 100 });
+        if (logo) gsap.set(logo, { yPercent: 10, opacity: 0, scale: 0.6 });
+        if (cta) gsap.set(cta, { opacity: 0 });
+        if (line) gsap.set(line, { clipPath: "inset(100% 0% 0% 0%)" });
+        return;
+      }
+
+      const tl = gsap.timeline({
+        onComplete: () => showCardFinal(index),
+      });
+
+      tl.to(
+        card,
+        {
+          yPercent: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 1.1,
+          delay: 0.3,
+          ease: "expo.out",
+          transformOrigin: "50% 100%",
+        },
+        0,
+      );
+
+      if (line) {
+        tl.to(
+          line,
+          {
+            clipPath: "inset(0% 0% 0% 0%)",
+            duration: 1.5,
+            delay: 0.2,
+            ease: "expo.out",
+          },
+          0,
+        );
+      }
+
+      if (yearEl && yearEl.dataset.expanded !== "true") {
+        const counter = { n: 0 };
+        yearEl.textContent = "'00";
+        tl.to(
+          counter,
+          {
+            n: target,
+            duration: 1.5,
+            delay: 0.2,
+            ease: "expo.out",
+            overwrite: false,
+            onUpdate: () => {
+              if (yearEl.dataset.expanded === "true") return;
+              yearEl.textContent = formatYear(counter.n);
+            },
+            onComplete: () => {
+              if (yearEl.dataset.expanded === "true") return;
+              yearEl.textContent = entry.year;
+            },
+          },
+          0,
+        );
+      }
+
+      if (titleLines.length) {
+        tl.to(
+          titleLines,
+          {
+            yPercent: 0,
+            duration: 0.6,
+            stagger: 0.1,
+            delay: 0.3,
+            ease: "expo.out",
+          },
+          0,
+        );
+      }
+
+      if (teaserLines.length) {
+        tl.to(
+          teaserLines,
+          {
+            yPercent: 0,
+            duration: 0.6,
+            stagger: 0.1,
+            delay: 0.4,
+            ease: "expo.out",
+          },
+          0,
+        );
+      }
+
+      if (logo) {
+        tl.to(
+          logo,
+          {
+            yPercent: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.5,
+            delay: 0.45,
+            ease: "power3.inOut",
+          },
+          0,
+        );
+      }
+
+      if (meta) {
+        tl.to(
+          meta,
+          {
+            yPercent: 0,
+            duration: 0.4,
+            delay: 0.6,
+            ease: "expo.out",
+          },
+          0,
+        );
+      }
+
+      if (cta) {
+        tl.to(
+          cta,
+          {
+            opacity: 1,
+            duration: 1.4,
+            delay: 0.8,
+            ease: "expo.out",
+          },
+          0,
+        );
       }
     };
 
     const ctx = gsap.context(() => {
-      requestAnimationFrame(() => rebuild());
-      setTimeout(() => rebuild(), 600);
+      // Header entrance — label width + line rises (reference data-tl pattern)
+      if (!reducedMotion) {
+        if (labelRef.current) {
+          gsap.fromTo(
+            labelRef.current,
+            { clipPath: "inset(0 100% 0 0)", opacity: 0 },
+            {
+              clipPath: "inset(0 0% 0 0)",
+              opacity: 1,
+              duration: 0.7,
+              ease: "expo.inOut",
+              scrollTrigger: {
+                trigger: section,
+                start: "top 90%",
+                toggleActions: "restart none restart none",
+              },
+            },
+          );
+        }
 
-      ScrollTrigger.addEventListener("refresh", onGlobalRefresh);
+        const headingLines = headingRef.current?.querySelectorAll("[data-line]");
+        if (headingLines?.length) {
+          gsap.fromTo(
+            headingLines,
+            { yPercent: 100 },
+            {
+              yPercent: 0,
+              duration: 0.6,
+              stagger: 0.1,
+              delay: 0.15,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: section,
+                start: "top 90%",
+                toggleActions: "restart none restart none",
+              },
+            },
+          );
+        }
 
-      animRefs.current.forEach((shell) => {
-        if (!shell) return;
+        if (introRef.current) {
+          gsap.fromTo(
+            introRef.current,
+            { y: 24, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.65,
+              delay: 0.25,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: section,
+                start: "top 88%",
+                toggleActions: "restart none restart none",
+              },
+            },
+          );
+        }
+      }
+
+      gsap.to(blobRef.current, {
+        y: 80,
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+
+      const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+
+      cardRefs.current.forEach((card, index) => {
+        if (!card) return;
+        const titleLines = card.querySelectorAll("[data-anim='title-line']");
+        const teaserLines = card.querySelectorAll("[data-anim='teaser-line']");
+        const meta = card.querySelector("[data-anim='meta']");
+        const logo = card.querySelector("[data-anim='logo']");
+        const cta = card.querySelector("[data-anim='cta']");
+        const line = wrapRefs.current[index]?.querySelector(".about-card-point-line");
 
         if (reducedMotion) {
-          gsap.set(shell, { opacity: 1, y: 0 });
+          gsap.set(card, { opacity: 1, yPercent: 0, scale: 1 });
+          gsap.set([titleLines, teaserLines, meta], { yPercent: 0 });
+          if (logo) gsap.set(logo, { opacity: 1, scale: 1, yPercent: 0 });
+          if (cta) gsap.set(cta, { opacity: 1 });
+          if (line) gsap.set(line, { clipPath: "inset(0% 0% 0% 0%)" });
           return;
         }
 
-        gsap.set(shell, { opacity: 0, y: 48 });
-        const yearEl = shell.querySelector<HTMLElement>('[data-anim="year"]');
-        if (yearEl) yearEl.textContent = "'00";
+        gsap.set(card, {
+          yPercent: 10,
+          opacity: 0,
+          scale: 0.6,
+          transformOrigin: "50% 100%",
+        });
+        gsap.set(titleLines, { yPercent: 100 });
+        gsap.set(teaserLines, { yPercent: 100 });
+        if (meta) gsap.set(meta, { yPercent: 100 });
+        if (logo) gsap.set(logo, { yPercent: 10, opacity: 0, scale: 0.6 });
+        if (cta) gsap.set(cta, { opacity: 0 });
+        if (line) gsap.set(line, { clipPath: "inset(100% 0% 0% 0%)" });
       });
 
-      if (!reducedMotion && blobRef.current) {
-        gsap.to(blobRef.current, {
-          y: -180,
-          x: 90,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.55,
+      if (reducedMotion) {
+        gsap.set(overflow, { height: "100%" });
+        return;
+      }
+
+      gsap.set(overflow, { height: "0%" });
+      revealedRef.current = about.timeline.map(() => false);
+
+      // Reference: height unveil keyframes scrubbed to container scroll
+      gsap.to(overflow, {
+        ease: "none",
+        keyframes: [
+          { height: "14%", duration: 2 },
+          { height: "28%", duration: 1 },
+          { height: "42%", duration: 1.5 },
+          { height: "56%", duration: 2 },
+          { height: "70%", duration: 1 },
+          { height: "84%", duration: 1.5 },
+          { height: "100%", duration: 2 },
+        ],
+        scrollTrigger: {
+          trigger: container,
+          start: "top 90%",
+          end: "bottom 80%",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            REVEAL_AT.forEach((at, i) => {
+              if (self.progress >= at) playCard(i);
+              else playCard(i, true);
+            });
+          },
+          onRefresh: (self) => {
+            REVEAL_AT.forEach((at, i) => {
+              if (self.progress >= at) showCardFinal(i);
+              else playCard(i, true);
+            });
+          },
+        },
+      });
+
+      wrapRefs.current.forEach((wrap, index) => {
+        if (!wrap) return;
+        ScrollTrigger.create({
+          trigger: isDesktop ? container : wrap,
+          start: isDesktop ? CARD_STARTS[index] : "top 82%",
+          end: isDesktop ? "bottom top" : "bottom top",
+          onEnter: () => playCard(index),
+          onEnterBack: () => playCard(index),
+          onLeave: () => playCard(index, true),
+          onLeaveBack: () => playCard(index, true),
+          onRefresh: (self) => {
+            if (self.isActive || self.progress > 0) showCardFinal(index);
           },
         });
-      }
+      });
+
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+      setTimeout(() => debouncedScrollRefresh(80)(), 400);
     }, section);
 
-    let resizeTimer: ReturnType<typeof setTimeout>;
-    const onResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(rebuild, 120);
-    };
+    const onResize = () => debouncedScrollRefresh(120)();
     window.addEventListener("resize", onResize);
 
     return () => {
-      clearTimeout(resizeTimer);
       window.removeEventListener("resize", onResize);
-      ScrollTrigger.removeEventListener("refresh", onGlobalRefresh);
-      drawTweenRef.current?.scrollTrigger?.kill();
-      drawTweenRef.current?.kill();
-      drawTweenRef.current = null;
       ctx.revert();
     };
-  }, [rebuild, reducedMotion, updateDots]);
-
-  useEffect(() => {
-    const timer = setTimeout(rebuild, 420);
-    return () => clearTimeout(timer);
-  }, [openIndex, rebuild]);
-
-  const toggleCard = (index: number) => {
-    setOpenIndex((prev) => (prev === index ? null : index));
-  };
+  }, [reducedMotion]);
 
   return (
     <section
       ref={sectionRef}
       id="about"
-      className="relative overflow-hidden bg-background"
+      className="relative z-[1] overflow-x-hidden bg-background pb-[10vw] pt-[3vw] lg:pb-[8vw] lg:pt-[2.5vw]"
     >
       <div
         ref={blobRef}
@@ -365,104 +619,78 @@ export function AboutJourney() {
         aria-hidden
       />
 
-      <div className="relative z-10 px-5 pb-4 pt-16 lg:px-10 lg:pt-24">
+      <div className="relative z-10 px-5 lg:px-[2vw] lg:pr-[2vw]">
         <div className="max-w-3xl">
-          <span className="section-label">{about.label}</span>
-          <h2 className="text-display mt-5 text-[clamp(2.25rem,5.5vw,4rem)] font-extrabold leading-[0.96] tracking-tight">
-            About Us (&) Our Journey
+          <span
+            ref={labelRef}
+            className="section-label inline-block overflow-hidden whitespace-nowrap"
+          >
+            {about.label}
+          </span>
+          <h2
+            ref={headingRef}
+            className="text-display mt-5 text-[clamp(2.25rem,5.5vw,4rem)] font-extrabold leading-[0.96] tracking-tight"
+          >
+            <span className="journey-split">
+              <span data-line className="journey-split-line block">
+                About Us (&)
+              </span>
+            </span>
+            <span className="journey-split">
+              <span data-line className="journey-split-line block">
+                Our Journey
+              </span>
+            </span>
           </h2>
-          <p className="mt-4 max-w-[40ch] text-[15px] leading-relaxed text-muted lg:text-base">
+          <p
+            ref={introRef}
+            className="mt-4 max-w-[40ch] text-[15px] leading-relaxed text-muted lg:text-base"
+          >
             {about.intro}
           </p>
         </div>
-      </div>
 
-      <div
-        ref={timelineRef}
-        className="journey-timeline relative z-10 mx-auto grid max-w-5xl grid-cols-1 gap-y-20 px-5 pb-32 pt-12 md:grid-cols-2 md:gap-x-28 md:gap-y-32 md:px-10 lg:gap-x-32 lg:gap-y-40"
-      >
-        <svg
-          ref={svgRef}
-          className="pointer-events-none absolute inset-0 z-[1] h-full w-full overflow-visible"
-          aria-hidden
+        <div
+          ref={containerRef}
+          className="about-card-container relative mt-[clamp(2rem,2.78vw,3.5rem)] w-full overflow-visible md:aspect-[1118/2166]"
         >
-          <path ref={lineRef} className="journey-line" />
-          <path ref={tailRef} className="journey-tail" />
-          <g ref={dotsRef} />
-        </svg>
-
-        {about.timeline.map((entry, i) => {
-          const isOpen = openIndex === i;
-          const isRight = entry.side === "right";
-          return (
-            <article
-              key={entry.year}
-              ref={(el) => {
-                cardRefs.current[i] = el;
-              }}
-              data-side={entry.side}
-              className={`relative z-[2] w-full max-w-[360px] ${
-                isRight
-                  ? "md:col-start-2 md:justify-self-end"
-                  : "md:col-start-1 md:justify-self-start"
-              } ${CARD_OFFSETS[i] ?? ""}`}
+          <div className="pointer-events-none absolute inset-0 z-0 hidden text-foreground md:block">
+            <div
+              ref={overflowRef}
+              className="about-timeline-overflow absolute inset-x-0 top-0 overflow-hidden"
+              style={{ height: "0%" }}
             >
-              <div
-                ref={(el) => {
-                  animRefs.current[i] = el;
+              <AboutTimelineSvg className="block w-full" />
+            </div>
+          </div>
+
+          <div className="relative z-[6] flex flex-col gap-10 md:contents">
+            {about.timeline.map((entry, index) => (
+              <JourneyCard
+                key={entry.year}
+                index={index}
+                open={openIndex === index}
+                onToggle={() =>
+                  setOpenIndex((prev) => (prev === index ? null : index))
+                }
+                cardRef={(el) => {
+                  cardRefs.current[index] = el;
                 }}
-                className="journey-card journey-card-anim rounded-[22px] border border-foreground/[0.05] bg-white/80 p-5 shadow-[0_10px_36px_rgba(0,0,0,0.05)] backdrop-blur-md md:p-6"
-              >
-                <div className="overflow-hidden pb-1">
-                  <div
-                    data-anim="year"
-                    data-expanded={isOpen ? "true" : "false"}
-                    className="text-display text-[clamp(2.75rem,5vw,4.25rem)] font-extrabold leading-none tracking-[-0.04em] text-accent"
-                  >
-                    {isOpen ? entry.fullYear : entry.year}
-                  </div>
-                </div>
+                yearRef={(el) => {
+                  yearRefs.current[index] = el;
+                }}
+                wrapRef={(el) => {
+                  wrapRefs.current[index] = el;
+                }}
+              />
+            ))}
+          </div>
+        </div>
 
-                <h3 className="text-display mt-3 text-[1.15rem] font-bold leading-snug tracking-tight md:text-[1.25rem]">
-                  {entry.title}
-                </h3>
-
-                <p className="mt-2 text-[13px] leading-relaxed text-muted md:text-sm">
-                  {entry.teaser}
-                </p>
-
-                <div
-                  className="overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                  style={{ maxHeight: isOpen ? 280 : 0 }}
-                >
-                  <p className="mt-3 text-[13px] leading-relaxed text-muted md:text-sm">
-                    {entry.full}
-                  </p>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between gap-2 border-t border-foreground/8 pt-3">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <BrandLogo variant="mark" className="h-6 w-6 shrink-0" />
-                    <p className="truncate text-[11px] text-muted">
-                      <span className="font-semibold text-foreground">
-                        {entry.attribution}
-                      </span>{" "}
-                      {entry.timeAgo}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => toggleCard(i)}
-                    className="focus-ring shrink-0 rounded-full bg-foreground/[0.05] px-3.5 py-1.5 text-[11px] font-medium transition-colors hover:brand-gradient hover:text-white"
-                    aria-expanded={isOpen}
-                  >
-                    {isOpen ? "Read less" : "Read more"}
-                  </button>
-                </div>
-              </div>
-            </article>
-          );
-        })}
+        <div
+          className="pointer-events-none hidden h-[min(10vw,120px)] md:block"
+          aria-hidden
+        />
       </div>
     </section>
   );

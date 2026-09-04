@@ -11,7 +11,7 @@ const colSpan = (index: number) => {
 
 export function Solutions() {
   return (
-    <section id="solutions" className="relative overflow-hidden px-4 py-28 lg:py-32 lg:pr-8">
+    <section id="solutions" className="relative overflow-hidden px-4 py-[8vw] lg:px-[2vw] lg:py-[6vw]">
       <div
         className="pointer-events-none absolute -left-[10%] top-[8%] h-[480px] w-[480px] rounded-full opacity-60 blur-3xl"
         style={{

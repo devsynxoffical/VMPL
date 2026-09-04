@@ -9,17 +9,124 @@ import { BrandMark } from "@/components/BrandMark";
 import { FacebookIcon, LinkedInIcon } from "@/components/SocialIcons";
 
 function NavIcon({ name }: { name: string }) {
-  const icons: Record<string, string> = {
-    Home: "⌂",
-    About: "◷",
-    Solutions: "◎",
-    Projects: "▣",
-    "What You Get": "◆",
-    Clients: "✦",
-    Team: "◉",
-    FAQ: "?",
-  };
-  return <span className="text-[10px] opacity-70">{icons[name] ?? "•"}</span>;
+  const common = "h-3.5 w-3.5 shrink-0";
+  switch (name) {
+    case "Home":
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+    case "About":
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
+          <path
+            d="M12 8v.5M12 11v5"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+    case "Projects":
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <rect x="4" y="5" width="16" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
+          <rect x="4" y="11" width="16" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
+          <rect x="4" y="17" width="16" height="3" rx="1" stroke="currentColor" strokeWidth="1.8" />
+        </svg>
+      );
+    case "What You Get":
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M12 4 5 8v8l7 4 7-4V8l-7-4Z"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+          <path d="M5 8l7 4 7-4M12 12v8" stroke="currentColor" strokeWidth="1.8" />
+        </svg>
+      );
+    case "Clients":
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+          <path
+            d="M5.5 19c.8-3 3.3-4.8 6.5-4.8s5.7 1.8 6.5 4.8"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+    case "Solutions":
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M13 3 5 14h7l-1 7 8-11h-7l1-7Z"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+    case "Team":
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="9" cy="8" r="2.6" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="16" cy="9" r="2.2" stroke="currentColor" strokeWidth="1.8" />
+          <path
+            d="M4.5 19c.7-2.6 2.8-4 5.5-4s4.8 1.4 5.5 4M14 15c1.8.2 3.4 1.2 4.2 3.2"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+    case "Connect":
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4 3.5V16H7.5A2.5 2.5 0 0 1 5 13.5v-7Z"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+    default:
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
+          <path
+            d="M12 16.5v.5M12 8c1.4 0 2.3.8 2.3 2s-.9 1.7-2.1 2.1c-.7.2-1.2.6-1.2 1.4V14"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+  }
+}
+
+function CopyIcon() {
+  return (
+    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
 }
 
 function clamp01(n: number) {
@@ -28,7 +135,7 @@ function clamp01(n: number) {
 
 export function SideNav() {
   const activeId = useScrollSpy(navItems.map((n) => n.id));
-  const { progress, sidebarVisible } = useHeroScroll();
+  const { progress } = useHeroScroll();
   const [copied, setCopied] = useState(false);
 
   const copyEmail = async () => {
@@ -41,105 +148,138 @@ export function SideNav() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Shell only: logo + socials + short tagline (already in sidebar)
-  const shell = clamp01(progress / 0.1);
-
-  // Docked content appears ONLY after hero pieces finish flying in —
-  // so you never see duplicates mid-scroll.
-  const docked = clamp01((progress - 0.72) / 0.18);
-
-  const opacity = sidebarVisible ? Math.max(shell, 0.98) : shell;
-  const translateX = sidebarVisible ? 0 : (1 - shell) * -24;
-  const interactive = opacity > 0.4 && docked > 0.4;
+  // Reference-style staged reveal synced to hero scrub:
+  // 1) shell fades while wordmark docks  2) panels rise  3) header brand locks in
+  const shell = clamp01((progress - 0.3) / 0.22);
+  const docked = clamp01((progress - 0.48) / 0.22);
+  const headerReady = clamp01((progress - 0.62) / 0.12);
+  const interactive = shell > 0.55 && docked > 0.4;
 
   return (
     <aside
-      className="fixed left-3 top-3 bottom-3 z-40 hidden w-[var(--sidebar-width)] flex-col rounded-[22px] glass-card p-3.5 lg:flex"
+      className="fixed z-[70] hidden flex-col gap-2 rounded-[26px] bg-[#f3eef4] p-2.5 lg:flex"
       style={{
-        opacity,
-        transform: `translateX(${translateX}px)`,
-        pointerEvents: opacity > 0.35 ? "auto" : "none",
+        left: "var(--sidebar-left)",
+        top: "1.25vw",
+        bottom: "1.25vw",
+        width: "var(--sidebar-width)",
+        opacity: shell,
+        // Keep at final X so Flip/dock math can measure [data-dock=header] accurately
+        pointerEvents: interactive ? "auto" : "none",
       }}
+      aria-hidden={shell < 0.2}
     >
-      <div className="mb-3 flex items-start justify-between gap-1">
-        <button
-          onClick={() => scrollTo("hero")}
-          className="focus-ring rounded-lg"
-          aria-label="Go to home"
-        >
-          <BrandLogo variant="full" className="w-[118px]" priority />
-        </button>
-        <div className="flex gap-1.5 pt-0.5">
-          <a
-            href={site.socials.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="focus-ring flex h-7 w-7 items-center justify-center rounded-md bg-white/60 transition-colors hover:bg-white"
-            aria-label="LinkedIn"
+      <div className="rounded-[22px] bg-white px-3 py-3">
+        <div className="mb-2.5 flex items-start justify-between gap-2">
+          <button
+            data-dock="header"
+            onClick={() => scrollTo("hero")}
+            className="focus-ring flex items-center rounded-xl bg-accent px-2.5 py-1.5"
+            style={{ opacity: headerReady }}
+            aria-label="Go to home"
           >
-            <LinkedInIcon className="h-[15px] w-[15px]" />
-          </a>
-          <a
-            href={site.socials.facebook}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="focus-ring flex h-7 w-7 items-center justify-center rounded-md bg-white/60 transition-colors hover:bg-white"
-            aria-label="Facebook"
+            <span className="text-[13px] font-extrabold tracking-tight text-white">
+              {hero.bgText}
+              <sup className="text-[8px]">®</sup>
+            </span>
+          </button>
+          <div
+            className="flex gap-1"
+            style={{ opacity: docked }}
           >
-            <FacebookIcon className="h-[15px] w-[15px]" />
-          </a>
+            <a
+              href={site.socials.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="focus-ring flex h-8 w-8 items-center justify-center rounded-xl bg-white"
+              aria-label="LinkedIn"
+            >
+              <LinkedInIcon className="h-3.5 w-3.5" />
+            </a>
+            <a
+              href={site.socials.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="focus-ring flex h-8 w-8 items-center justify-center rounded-xl bg-white"
+              aria-label="Facebook"
+            >
+              <FacebookIcon className="h-3.5 w-3.5" />
+            </a>
+          </div>
         </div>
+        <p
+          className="text-[10px] font-medium leading-relaxed text-foreground/80"
+          style={{ opacity: docked }}
+        >
+          {hero.positioning}
+        </p>
       </div>
 
-      <p className="mb-3 text-[10px] font-medium leading-relaxed text-foreground/80">
-        {hero.eyebrow}
-      </p>
-
       <div
-        className={`flex flex-col ${docked > 0.02 ? "min-h-0 flex-1" : ""}`}
+        data-dock-panel
+        className="flex min-h-0 flex-1 flex-col gap-2"
         style={{
           opacity: docked,
-          visibility: docked < 0.02 ? "hidden" : "visible",
+          transform: `translateY(${(1 - docked) * 18}px)`,
           pointerEvents: interactive ? "auto" : "none",
         }}
       >
-        <p className="mb-3 text-[10px] leading-relaxed text-muted">
-          {hero.positioning.slice(0, 90)}…
-        </p>
-
-        <div className="mb-3 grid grid-cols-2 gap-1.5">
-          {hero.stats.map((stat) => (
-            <div key={stat.label} className="rounded-xl bg-white/50 p-2">
-              <div className="text-display text-base font-bold text-accent">
-                {stat.value}
-                {stat.suffix}
-              </div>
-              <div className="text-[8px] font-semibold uppercase tracking-wider text-muted">
-                {stat.label}
-              </div>
+        <div
+          className="grid grid-cols-2 divide-x divide-foreground/10 rounded-[22px] bg-white/70 px-3 py-3"
+          data-dock="stats"
+        >
+          <div className="pr-3">
+            <BrandLogo variant="mark" className="mb-1 h-7 w-7" />
+            <div className="text-display text-lg font-extrabold leading-none text-foreground">
+              {hero.stats[0].value}
+              {hero.stats[0].suffix}
             </div>
-          ))}
+            <div className="mt-0.5 text-[10px] font-bold leading-tight text-foreground">
+              {hero.stats[0].label}
+            </div>
+          </div>
+          <div className="pl-3">
+            <div className="text-display text-[1.65rem] font-extrabold leading-none text-accent">
+              {hero.stats[1].value}
+              {hero.stats[1].suffix}
+            </div>
+            <div className="mt-1 text-[10px] font-bold leading-tight text-foreground">
+              Years of
+              <br />
+              experience
+            </div>
+          </div>
         </div>
 
-        <nav className="flex-1 space-y-0.5 overflow-y-auto" aria-label="Main">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => scrollTo(item.id)}
-              className={`focus-ring flex w-full items-center gap-2 rounded-full px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider transition-all ${
-                activeId === item.id
-                  ? "brand-gradient text-white"
-                  : "text-foreground/70 hover:bg-white/50"
-              }`}
-            >
-              <NavIcon name={item.label} />
-              {item.label}
-            </button>
-          ))}
+        <nav
+          className="min-h-0 flex-1 overflow-y-auto rounded-[22px] bg-white/70 px-2.5 py-2.5"
+          aria-label="Main"
+          data-dock="nav"
+        >
+          <div className="flex flex-col items-start gap-1.5">
+            {navItems.map((item) => {
+              const active = activeId === item.id;
+              return (
+                <button
+                  key={item.id}
+                  data-dock-nav={item.id}
+                  onClick={() => scrollTo(item.id)}
+                  className={`focus-ring inline-flex items-center gap-2 rounded-full px-3 py-2 text-left text-[11px] font-extrabold uppercase tracking-[0.08em] transition-colors ${
+                    active
+                      ? "bg-accent text-white"
+                      : "bg-[#f7f3f8] text-foreground hover:bg-white"
+                  }`}
+                >
+                  <NavIcon name={item.label} />
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
-        <div className="my-2 overflow-hidden rounded-lg">
-          <div className="marquee-track items-center py-2">
+        <div className="overflow-hidden rounded-[18px] bg-white/70 px-2 py-2">
+          <div className="marquee-track items-center">
             {[...projectLogos, ...projectLogos].map((logo, i) => (
               <a
                 key={`${logo.src}-${i}`}
@@ -155,20 +295,27 @@ export function SideNav() {
           </div>
         </div>
 
-        <div className="mb-2 flex items-center justify-between rounded-full bg-white/50 px-2.5 py-1.5">
-          <span className="truncate text-[10px] text-muted">{site.email}</span>
+        <div className="flex items-center justify-between rounded-[18px] bg-white/70 px-3 py-2">
+          <span className="truncate text-[10px] font-medium text-foreground/80">
+            {site.email}
+          </span>
           <button
             onClick={copyEmail}
-            className="focus-ring ml-1 shrink-0 rounded-md bg-foreground/5 px-1.5 py-0.5 text-[9px] font-semibold uppercase"
+            className="focus-ring ml-2 shrink-0 text-foreground"
             aria-label="Copy email"
           >
-            {copied ? "Copied" : "Copy"}
+            {copied ? (
+              <span className="text-[9px] font-bold uppercase">Copied</span>
+            ) : (
+              <CopyIcon />
+            )}
           </button>
         </div>
 
         <a
           href={site.bookingLink}
-          className="btn-primary w-full py-2.5 text-center text-xs"
+          data-dock="cta"
+          className="rounded-[18px] bg-accent py-3 text-center text-[13px] font-extrabold uppercase tracking-[0.04em] text-white"
         >
           Find My Solution
         </a>

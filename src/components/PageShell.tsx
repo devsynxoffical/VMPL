@@ -11,6 +11,7 @@ import { CapabilitiesReveal } from "@/components/CapabilitiesReveal";
 import { Testimonials } from "@/components/Testimonials";
 import { Team } from "@/components/Team";
 import { Faq } from "@/components/Faq";
+import { StatementSection } from "@/components/StatementSection";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { MainContent } from "@/components/MainContent";
 
@@ -29,6 +30,7 @@ export function PageShell() {
             <Testimonials />
             <Solutions />
             <Team />
+            <StatementSection />
             <Faq />
           </MainContent>
         </main>

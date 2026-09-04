@@ -75,17 +75,20 @@ export function Faq() {
   };
 
   return (
-    <section id="faq" className="relative overflow-hidden px-4 pb-24 pt-8 lg:pr-8 lg:pt-12">
+    <section
+      id="faq"
+      className="relative overflow-hidden bg-background px-4 pb-[8vw] pt-[6vw] lg:px-[2vw] lg:pb-[6vw] lg:pt-[5vw]"
+    >
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 select-none overflow-hidden px-4 text-center lg:px-0"
+        className="pointer-events-none absolute inset-x-0 top-[clamp(1.5rem,3vw,2.5rem)] select-none overflow-hidden px-4 text-center lg:px-0"
         aria-hidden
       >
-        <p className="text-display brand-gradient-text -mt-[0.08em] text-[clamp(4.5rem,19vw,13.5rem)] font-extrabold leading-[0.82] tracking-[-0.05em]">
+        <p className="text-display brand-gradient-text text-[clamp(4.5rem,19vw,13.5rem)] font-extrabold leading-[0.82] tracking-[-0.05em] opacity-90">
           {faq.displayText}
         </p>
       </div>
 
-      <div className="relative z-10 mx-auto max-w-5xl pt-[clamp(5rem,14vw,9rem)]">
+      <div className="relative z-10 mx-auto max-w-5xl pt-[clamp(7rem,18vw,12rem)]">
         <RevealOnScroll>
           <span className="section-label">{faq.label}</span>
           <h2 className="text-display mt-6 text-[clamp(2rem,4vw,3.5rem)] font-extrabold leading-tight tracking-tight">

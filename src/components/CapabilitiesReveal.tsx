@@ -1,148 +1,145 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { capabilities } from "@/content";
-import {
-  gsap,
-  registerGsap,
-  ScrollTrigger,
-  debouncedScrollRefresh,
-} from "@/lib/gsap";
+import { gsap, registerGsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-
-type Token =
-  | { kind: "word"; text: string }
-  | { kind: "pill"; icon: string; label: string };
-
-function buildTokens(): Token[] {
-  const tokens: Token[] = [];
-
-  capabilities.parts.forEach((part, partIndex) => {
-    if (part.type === "pill") {
-      tokens.push({ kind: "pill", icon: part.icon, label: part.label });
-      return;
-    }
-
-    const words = part.content.split(/\s+/).filter(Boolean);
-    const prevPart = capabilities.parts[partIndex - 1];
-    const needsLeadingSpace = prevPart?.type === "pill";
-
-    words.forEach((word, wordIndex) => {
-      const prefix = wordIndex === 0 && needsLeadingSpace ? "\u00a0" : "";
-      const suffix = wordIndex < words.length - 1 ? " " : "";
-      tokens.push({ kind: "word", text: prefix + word + suffix });
-    });
-  });
-
-  return tokens;
-}
 
 export function CapabilitiesReveal() {
   const sectionRef = useRef<HTMLElement>(null);
-  const textRef = useRef<HTMLParagraphElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const reducedMotion = useReducedMotion();
-  const tokens = useMemo(() => buildTokens(), []);
 
   useEffect(() => {
     registerGsap();
-    const text = textRef.current;
-    if (!text) return;
+    const section = sectionRef.current;
+    if (!section || reducedMotion) return;
 
-    const els = [...text.querySelectorAll<HTMLElement>("[data-token]")];
+    const ctx = gsap.context(() => {
+      const lines = headingRef.current?.querySelectorAll("[data-line]");
+      if (lines?.length) {
+        gsap.fromTo(
+          lines,
+          { yPercent: 100 },
+          {
+            yPercent: 0,
+            duration: 0.7,
+            stagger: 0.08,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 78%",
+              toggleActions: "restart none restart none",
+            },
+          },
+        );
+      }
 
-    if (reducedMotion) {
-      gsap.set(els, { opacity: 1 });
-      return;
-    }
+      if (descRef.current) {
+        gsap.fromTo(
+          descRef.current,
+          { y: 20, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.65,
+            delay: 0.12,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 76%",
+              toggleActions: "restart none restart none",
+            },
+          },
+        );
+      }
 
-    gsap.set(els, { opacity: 0.12 });
-    const setOpacity = els.map((el) => gsap.quickSetter(el, "opacity"));
-    let lastStep = -1;
+      const items = listRef.current?.querySelectorAll("[data-cap]");
+      if (items?.length) {
+        gsap.fromTo(
+          items,
+          { y: 36, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            stagger: 0.12,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: listRef.current,
+              start: "top 85%",
+              toggleActions: "restart none restart none",
+            },
+          },
+        );
+      }
+    }, section);
 
-    const paint = (progress: number) => {
-      const step = Math.round(progress * 100);
-      if (step === lastStep) return;
-      lastStep = step;
-
-      const total = els.length;
-      const spread = total + 0.5;
-      els.forEach((_, i) => {
-        const t = progress * spread - i;
-        setOpacity[i](gsap.utils.clamp(0.12, 1, t));
-      });
-    };
-
-    const st = ScrollTrigger.create({
-      trigger: text,
-      start: "top 85%",
-      end: "top 25%",
-      scrub: true,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => paint(self.progress),
-      onRefresh: (self) => paint(self.progress),
-    });
-
-    paint(st.progress);
-
-    const onResize = debouncedScrollRefresh();
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      window.removeEventListener("resize", onResize);
-      st.kill();
-    };
+    return () => ctx.revert();
   }, [reducedMotion]);
 
   return (
     <section
       ref={sectionRef}
       id="capabilities"
-      className="relative z-10 bg-background px-4 py-24 lg:py-32 lg:pr-8"
+      className="relative z-10 overflow-hidden bg-background px-4 py-[8vw] lg:px-[2vw] lg:py-[6vw]"
     >
-      <div className="pointer-events-none absolute left-[18%] top-[20%] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-accent/10 to-transparent blur-3xl" />
+      <div
+        className="pointer-events-none absolute -right-[8%] top-[10%] h-[50vw] w-[50vw] max-h-[520px] max-w-[520px] rounded-full opacity-70"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(230,43,118,0.14) 0%, rgba(123,34,141,0.06) 42%, transparent 70%)",
+          filter: "blur(40px)",
+        }}
+        aria-hidden
+      />
 
       <div className="relative z-10 mx-auto w-full max-w-6xl">
-        <h2 className="text-display text-[clamp(2.5rem,6vw,5rem)] font-extrabold leading-[0.95] tracking-tight">
-          {capabilities.label}
+        <span className="section-label">{capabilities.label}</span>
+
+        <h2
+          ref={headingRef}
+          className="text-display mt-5 text-[clamp(2.5rem,6vw,5rem)] font-extrabold leading-[0.95] tracking-tight"
+        >
+          <span className="block overflow-hidden">
+            <span data-line className="block">
+              {capabilities.heading}
+            </span>
+          </span>
         </h2>
 
-        <span className="section-label mt-8 w-fit">
-          {capabilities.eyebrow}
-        </span>
-
         <p
-          ref={textRef}
-          className="text-display mt-10 max-w-5xl text-[clamp(1.75rem,4.2vw,3.75rem)] font-extrabold leading-[1.22] tracking-[-0.03em]"
+          ref={descRef}
+          className="mt-6 max-w-[36ch] text-[15px] leading-relaxed text-muted lg:mt-7 lg:max-w-[42ch] lg:text-base"
         >
-          {tokens.map((token, i) => {
-            if (token.kind === "pill") {
-              return (
-                <span
-                  key={`pill-${i}`}
-                  data-token
-                  className="mx-0.5 inline-flex translate-y-[0.1em] items-center gap-1.5 whitespace-nowrap rounded-xl border border-foreground/10 bg-white/70 px-2.5 py-1 align-baseline shadow-sm backdrop-blur-sm lg:mx-1 lg:gap-2 lg:px-3 lg:py-1.5"
-                  style={{ opacity: 0.12 }}
-                >
-                  <span className="brand-gradient flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white lg:h-8 lg:w-8">
-                    {token.icon}
-                  </span>
-                  <span className="text-[0.88em]">{token.label}</span>
-                </span>
-              );
-            }
-
-            return (
-              <span
-                key={`word-${i}`}
-                data-token
-                className="inline"
-                style={{ opacity: 0.12 }}
-              >
-                {token.text}
-              </span>
-            );
-          })}
+          {capabilities.description}
         </p>
+
+        <ul
+          ref={listRef}
+          className="mt-14 grid grid-cols-1 gap-0 border-t border-foreground/10 md:mt-16 md:grid-cols-3"
+        >
+          {capabilities.items.map((item) => (
+            <li
+              key={item.title}
+              data-cap
+              className="group border-b border-foreground/10 py-8 md:border-b-0 md:border-r md:px-7 md:py-10 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
+            >
+              <span className="text-display text-[13px] font-bold tracking-[0.14em] text-accent">
+                {item.icon}
+              </span>
+              <h3 className="text-display mt-4 text-[clamp(1.65rem,2.8vw,2.35rem)] font-extrabold tracking-tight text-foreground">
+                {item.title}
+              </h3>
+              <p className="mt-3 max-w-[28ch] text-[14px] leading-relaxed text-muted lg:text-[15px]">
+                {item.copy}
+              </p>
+              <div className="mt-6 h-[2px] w-10 origin-left bg-accent transition-transform duration-500 group-hover:scale-x-150" />
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

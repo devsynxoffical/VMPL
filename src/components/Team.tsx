@@ -6,7 +6,7 @@ import { RevealOnScroll } from "@/components/SmoothScroll";
 
 export function Team() {
   return (
-    <section id="team" className="noise-bg px-4 py-24 lg:pr-8">
+    <section id="team" className="noise-bg px-4 py-[8vw] lg:px-[2vw] lg:py-[6vw]">
       <div className="relative z-10 mx-auto max-w-5xl">
         <RevealOnScroll>
           <span className="section-label">{team.label}</span>

@@ -45,28 +45,91 @@ export function Hero() {
     const mm = gsap.matchMedia();
 
     mm.add("(min-width: 1024px)", () => {
+      // Portrait + wordmark stay visible — never hide them before ScrollTrigger
+      // records start values (that was making the image stick at opacity 0).
+      gsap.set(portraitRef.current, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        filter: "blur(0px)",
+        clearProps: "visibility",
+      });
+      gsap.set(bgTextRef.current, { opacity: 1, scale: 1, x: 0, y: 0 });
+
+      const uiEls = [
+        navRef.current,
+        statsRef.current,
+        traitsRef.current,
+        headlineRef.current,
+        primaryCtaRef.current,
+        secondaryCtaRef.current,
+        bottomLeftRef.current,
+        bottomRightRef.current,
+      ].filter(Boolean);
+
+      gsap.set(uiEls, { opacity: 0, y: 28 });
+
+      const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
+      intro.to(uiEls, { opacity: 1, y: 0, duration: 0.7, stagger: 0.05 }, 0.2);
+
+      let headerMove = { x: -420, y: -80, scale: 0.08 };
+
+      const cacheHeaderMove = () => {
+        const el = bgTextRef.current;
+        const target = document.querySelector<HTMLElement>("[data-dock='header']");
+        if (!el || !target) return;
+
+        // Measure dock target at its final layout (ignore parent opacity)
+        const prevX = Number(gsap.getProperty(el, "x")) || 0;
+        const prevY = Number(gsap.getProperty(el, "y")) || 0;
+        const prevScale = Number(gsap.getProperty(el, "scale")) || 1;
+        gsap.set(el, { x: 0, y: 0, scale: 1, clearProps: "visibility" });
+        const a = el.getBoundingClientRect();
+        const b = target.getBoundingClientRect();
+        headerMove = {
+          x: b.left + b.width / 2 - (a.left + a.width / 2),
+          y: b.top + b.height / 2 - (a.top + a.height / 2),
+          scale: Math.max(0.045, (b.width / a.width) * 0.95),
+        };
+        gsap.set(el, { x: prevX, y: prevY, scale: prevScale });
+      };
+
+      // Dock target exists immediately; measure after layout
+      cacheHeaderMove();
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: container,
           start: "top top",
-          end: "+=150%",
+          end: "+=180%",
           pin: pin,
-          scrub: 0.45,
+          pinSpacing: true,
+          scrub: 0.85,
           anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onRefresh: cacheHeaderMove,
           onUpdate: (self) => setProgress(self.progress),
         },
       });
 
-      // Center stays center
-      tl.to(
+      // Phase 1 — UI rises out first (Heynesh: text + buttons leave before logo)
+      // Explicit fromTo so scrub progress 0 always shows the portrait
+      tl.fromTo(
         portraitRef.current,
         {
-          y: -90,
+          y: 0,
+          scale: 1,
+          opacity: 1,
+          filter: "blur(0px)",
+        },
+        {
+          y: -140,
           scale: 1.06,
           opacity: 0,
-          filter: "blur(10px)",
-          duration: 0.55,
+          filter: "blur(14px)",
+          duration: 0.5,
           ease: "power2.inOut",
+          immediateRender: false,
         },
         0,
       );
@@ -75,141 +138,73 @@ export function Hero() {
         { opacity: 0, y: 0, scale: 1 },
         {
           opacity: 0.9,
-          y: -30,
+          y: -40,
           scale: 1.1,
-          filter: "blur(30px)",
-          duration: 0.55,
+          filter: "blur(28px)",
+          duration: 0.45,
           ease: "power2.inOut",
         },
-        0.04,
-      );
-      tl.to(
-        bgTextRef.current,
-        { y: -70, opacity: 0.35, duration: 0.5, ease: "power2.out" },
-        0.08,
+        0.02,
       );
       tl.to(
         headlineRef.current,
-        { y: -110, opacity: 0, duration: 0.45, ease: "power2.in" },
-        0.18,
+        { y: -180, opacity: 0, duration: 0.4, ease: "power2.in" },
+        0.04,
       );
       tl.to(
-        secondaryCtaRef.current,
-        { y: -40, opacity: 0, duration: 0.35, ease: "power2.in" },
-        0.22,
+        [primaryCtaRef.current, secondaryCtaRef.current],
+        { y: -100, opacity: 0, duration: 0.38, ease: "power2.in" },
+        0.06,
       );
-      tl.to(bottomLeftRef.current, { y: -30, opacity: 0, duration: 0.3 }, 0.2);
-
-      // Hero nav buttons fly into sidebar — stay visible until they dock, then fade
-      const sidebarLeft = 36;
-      const stackTop = 268;
-      const stackGap = 34;
-
-      navBtnRefs.current.forEach((btn, i) => {
-        if (!btn) return;
-        const rect = btn.getBoundingClientRect();
-        const targetX = sidebarLeft - rect.left;
-        const targetY = stackTop + i * stackGap - rect.top;
-
-        tl.to(
-          btn,
-          {
-            x: targetX,
-            y: targetY,
-            scale: 0.9,
-            duration: 0.55,
-            ease: "power2.inOut",
-          },
-          0.06 + i * 0.03,
-        );
-        // fade only at the end of the flight (when sidebar takes over)
-        tl.to(
-          btn,
-          { opacity: 0, duration: 0.12, ease: "power1.in" },
-          0.55 + i * 0.03,
-        );
-      });
-
-      sepRefs.current.forEach((sep, i) => {
-        if (!sep) return;
-        tl.to(
-          sep,
-          { opacity: 0, duration: 0.15, ease: "power1.in" },
-          0.04 + i * 0.02,
-        );
-      });
-
-      // Stats fly to sidebar, fade only when docking
       tl.to(
-        statsRef.current,
+        navRef.current,
+        { y: -90, opacity: 0, duration: 0.38, ease: "power2.in" },
+        0.08,
+      );
+      tl.to(
+        [statsRef.current, traitsRef.current],
+        { y: -100, opacity: 0, duration: 0.36, ease: "power2.in" },
+        0.07,
+      );
+      tl.to(
+        [bottomLeftRef.current, bottomRightRef.current],
+        { y: -55, opacity: 0, duration: 0.3, ease: "power2.in" },
+        0.09,
+      );
+
+      // Phase 2 — giant VAISHALI docks into sidebar header (Flip-style delta)
+      gsap.set(bgTextRef.current, { transformOrigin: "50% 50%" });
+      tl.to(
+        bgTextRef.current,
         {
-          x: -200,
-          y: -40,
-          scale: 0.7,
+          x: () => headerMove.x,
+          y: () => headerMove.y,
+          scale: () => headerMove.scale,
           duration: 0.55,
           ease: "power2.inOut",
         },
-        0.1,
+        0.26,
       );
       tl.to(
-        statsRef.current,
-        { opacity: 0, duration: 0.12, ease: "power1.in" },
-        0.58,
+        bgTextRef.current,
+        { opacity: 0, duration: 0.1, ease: "none" },
+        0.7,
       );
-
-      // Bio flies to sidebar
-      tl.to(
-        bottomRightRef.current,
-        {
-          x: -520,
-          y: -140,
-          scale: 0.85,
-          duration: 0.55,
-          ease: "power2.inOut",
-        },
-        0.12,
-      );
-      tl.to(
-        bottomRightRef.current,
-        { opacity: 0, duration: 0.12, ease: "power1.in" },
-        0.6,
-      );
-
-      // Primary CTA flies to sidebar button slot
-      tl.to(
-        primaryCtaRef.current,
-        {
-          x: () => {
-            const el = primaryCtaRef.current;
-            if (!el) return -300;
-            return 48 - el.getBoundingClientRect().left;
-          },
-          y: 110,
-          scale: 0.88,
-          duration: 0.55,
-          ease: "power2.inOut",
-        },
-        0.16,
-      );
-      tl.to(
-        primaryCtaRef.current,
-        { opacity: 0, duration: 0.12, ease: "power1.in" },
-        0.62,
-      );
-
-      tl.to(
-        traitsRef.current,
-        { opacity: 0, y: -20, duration: 0.35, ease: "power2.in" },
-        0.1,
-      );
+      tl.set(bgTextRef.current, { visibility: "hidden" }, 0.78);
 
       tl.to(
         portraitBlurRef.current,
-        { opacity: 0.4, y: -80, duration: 0.35 },
+        { opacity: 0.2, y: -100, duration: 0.35 },
         0.55,
       );
 
+      requestAnimationFrame(() => {
+        cacheHeaderMove();
+        ScrollTrigger.refresh();
+      });
+
       return () => {
+        intro.kill();
         tl.scrollTrigger?.kill();
         tl.kill();
       };
@@ -235,41 +230,44 @@ export function Hero() {
     <div ref={containerRef} id="hero" className="relative">
       <div
         ref={pinRef}
-        className="relative flex h-screen w-full flex-col overflow-hidden bg-background"
+        className="relative flex h-screen w-full flex-col overflow-visible bg-background"
       >
+        {/* VAISHALI — giant background wordmark (docks into sidebar header) */}
         <div
           ref={bgTextRef}
-          className="text-display brand-gradient-text pointer-events-none absolute inset-x-0 top-[5%] z-[1] select-none text-center text-[clamp(4.5rem,20vw,16rem)] font-extrabold leading-none tracking-[-0.06em] will-change-transform"
+          className="text-display brand-gradient-text pointer-events-none absolute inset-x-0 top-[2%] z-[1] select-none px-[0.5%] text-center text-[clamp(4.5rem,20vw,20rem)] font-extrabold leading-none tracking-[-0.04em] will-change-transform"
           aria-hidden
         >
           {hero.bgText}
-          <sup className="text-[0.12em] font-bold">®</sup>
+          <sup className="ml-1 align-super text-[0.12em] font-bold leading-none">
+            ®
+          </sup>
         </div>
 
         <div
           ref={portraitBlurRef}
-          className="pointer-events-none absolute left-1/2 top-[5%] z-[2] h-[min(58vh,520px)] w-[min(380px,46vw)] -translate-x-1/2 opacity-0 will-change-transform"
+          className="pointer-events-none absolute bottom-0 left-1/2 top-[3%] z-[2] w-[min(58vw,780px)] -translate-x-1/2 opacity-0 will-change-transform"
           aria-hidden
         >
-          <div className="relative h-full w-full overflow-hidden">
+          <div className="relative h-full w-full">
             <Image
-              src="/hero.png"
+              src="/vaishali-kapoor.png"
               alt=""
               fill
-              className="scale-110 object-cover object-[center_12%] blur-2xl"
-              sizes="420px"
+              className="object-contain object-[center_top] blur-2xl"
+              sizes="780px"
             />
           </div>
         </div>
 
-        {/* Same nav items as sidebar — these fly into the sidebar */}
+        {/* Nav BELOW VAISHALI */}
         <nav
           ref={navRef}
-          className="absolute inset-x-0 top-[21%] z-[60] hidden lg:block"
+          className="absolute inset-x-0 top-[calc(2%+clamp(4.5rem,20vw,20rem)+0.35rem)] z-[50] hidden lg:block"
           aria-label="Hero navigation"
         >
-          <div className="relative mx-auto flex max-w-6xl items-center justify-between px-[4%]">
-            <div className="flex items-center">
+          <div className="mx-auto flex w-full max-w-[96rem] items-center justify-between gap-8 px-[5%]">
+            <div className="flex items-center whitespace-nowrap">
               {navItems.slice(0, 4).map((item, i) => (
                 <span key={item.id} className="flex items-center">
                   {i > 0 && (
@@ -277,7 +275,7 @@ export function Hero() {
                       ref={(el) => {
                         sepRefs.current[i - 1] = el;
                       }}
-                      className="mx-3 text-foreground/25"
+                      className="mx-3 text-[14px] font-bold leading-none text-foreground xl:mx-3.5"
                       aria-hidden
                     >
                       |
@@ -288,14 +286,15 @@ export function Hero() {
                       navBtnRefs.current[i] = el;
                     }}
                     onClick={() => scrollTo(item.id)}
-                    className="focus-ring whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.18em] text-foreground will-change-transform lg:text-[11px]"
+                    className="focus-ring text-[13px] font-bold uppercase leading-none tracking-[0.12em] text-foreground will-change-transform xl:text-[14px]"
                   >
                     {item.label}
                   </button>
                 </span>
               ))}
             </div>
-            <div className="flex items-center">
+
+            <div className="flex items-center whitespace-nowrap">
               {navItems.slice(4).map((item, i) => {
                 const idx = i + 4;
                 return (
@@ -305,7 +304,7 @@ export function Hero() {
                         ref={(el) => {
                           sepRefs.current[idx - 1] = el;
                         }}
-                        className="mx-3 text-foreground/25"
+                        className="mx-3 text-[14px] font-bold leading-none text-foreground xl:mx-3.5"
                         aria-hidden
                       >
                         |
@@ -316,7 +315,7 @@ export function Hero() {
                         navBtnRefs.current[idx] = el;
                       }}
                       onClick={() => scrollTo(item.id)}
-                      className="focus-ring whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.18em] text-foreground will-change-transform lg:text-[11px]"
+                      className="focus-ring text-[13px] font-bold uppercase leading-none tracking-[0.12em] text-foreground will-change-transform xl:text-[14px]"
                     >
                       {item.label}
                     </button>
@@ -327,40 +326,46 @@ export function Hero() {
           </div>
         </nav>
 
+        {/* Left overlay cards — frosted glass */}
         <div
           ref={statsRef}
-          className="absolute left-[5%] top-[34%] z-[55] hidden flex-col gap-3 will-change-transform lg:flex"
+          className="absolute left-[3%] top-[58%] z-[35] hidden flex-col gap-3.5 will-change-transform lg:flex xl:left-[4.5%]"
         >
-          <div className="glass-card rounded-2xl px-4 py-3">
-            <div className="flex items-center gap-2">
-              <BrandLogo variant="mark" className="h-8 w-8" />
-              <span className="text-sm font-bold">
+          <div className="glass-overlay flex items-center gap-3 rounded-[22px] px-4 py-3.5">
+            <BrandLogo variant="mark" className="h-9 w-9 shrink-0" />
+            <div className="leading-tight">
+              <div className="text-display text-xl font-extrabold tracking-tight text-accent">
                 {hero.stats[0].value}
-                {hero.stats[0].suffix} {hero.stats[0].label}
-              </span>
+                {hero.stats[0].suffix}
+              </div>
+              <div className="text-[12px] font-bold text-foreground/90">
+                {hero.stats[0].label}
+              </div>
             </div>
           </div>
-          <div className="glass-card rounded-2xl px-4 py-3">
-            <div className="text-display text-2xl font-bold text-accent">
+          <div className="glass-overlay ml-5 rounded-[22px] px-5 py-4">
+            <div className="text-display text-[2.65rem] font-extrabold leading-none tracking-tight text-accent">
               {hero.stats[1].value}
               {hero.stats[1].suffix}
             </div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted">
-              {hero.stats[1].label}
+            <div className="mt-1 text-[12px] font-bold leading-snug text-foreground/90">
+              Years of
+              <br />
+              experience
             </div>
           </div>
         </div>
 
         <div
           ref={traitsRef}
-          className="absolute right-[5%] top-[34%] z-30 hidden will-change-transform lg:block"
+          className="absolute right-[3%] top-[58%] z-[35] hidden will-change-transform lg:block xl:right-[4.5%]"
         >
-          <div className="glass-card rounded-3xl px-5 py-4">
+          <div className="glass-overlay rounded-[26px] px-5 py-4">
             <ul className="space-y-3">
               {hero.traits.map((trait) => (
                 <li
                   key={trait}
-                  className="flex items-center gap-3 text-sm font-semibold"
+                  className="flex items-center gap-3 text-sm font-bold text-foreground/95"
                 >
                   <span className="h-2 w-2 shrink-0 rounded-full bg-accent" />
                   {trait}
@@ -370,30 +375,29 @@ export function Hero() {
           </div>
         </div>
 
+        {/* Portrait */}
         <div
           ref={portraitRef}
-          className="pointer-events-none absolute left-1/2 top-[5%] z-20 h-[min(58vh,520px)] w-[min(380px,46vw)] -translate-x-1/2 will-change-transform"
+          className="pointer-events-none absolute bottom-0 left-1/2 top-[3%] z-20 w-[min(58vw,780px)] -translate-x-1/2 will-change-transform"
         >
           <div className="relative h-full w-full">
             <Image
-              src="/hero.png"
+              src="/vaishali-kapoor.png"
               alt="Vaishali Media Productions"
               fill
               priority
-              className="object-cover object-[center_10%]"
-              sizes="(max-width: 768px) 70vw, 380px"
+              className="object-contain object-[center_top]"
+              sizes="(max-width: 768px) 95vw, 780px"
             />
-            <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-background via-background/85 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-[12%] bg-gradient-to-t from-background via-background/40 to-transparent" />
           </div>
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 z-30">
-          <div className="bg-gradient-to-t from-background from-[38%] via-background/98 to-transparent px-4 pb-8 pt-20 sm:pt-24 lg:pb-10 lg:pt-28">
-            <div
-              ref={headlineRef}
-              className="mx-auto w-full max-w-3xl text-center will-change-transform"
-            >
-              <h1 className="text-display text-[clamp(1.75rem,3.6vw,2.85rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-foreground">
+        {/* Headline + CTAs */}
+        <div className="absolute inset-x-0 bottom-[9%] z-40 flex justify-center px-4">
+          <div className="w-fit max-w-[min(100%,36rem)] text-center">
+            <div ref={headlineRef} className="will-change-transform">
+              <h1 className="text-display text-[clamp(2.6rem,5vw,4.25rem)] font-extrabold leading-[0.98] tracking-[-0.045em] text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.35)]">
                 {hero.headlineLines.map((line) => (
                   <span key={line} className="block">
                     {line}
@@ -402,7 +406,7 @@ export function Hero() {
               </h1>
             </div>
 
-            <div className="mx-auto mt-6 flex max-w-xl flex-wrap items-center justify-center gap-3 sm:gap-4">
+            <div className="mt-6 flex flex-nowrap items-center justify-center gap-3 sm:gap-3.5">
               <button
                 ref={primaryCtaRef}
                 onClick={() => scrollTo("solutions")}
@@ -413,26 +417,28 @@ export function Hero() {
               <button
                 ref={secondaryCtaRef}
                 onClick={() => scrollTo("projects")}
-                className="btn-secondary focus-ring will-change-transform shadow-[0_4px_20px_rgba(123,34,141,0.1)]"
+                className="btn-secondary focus-ring will-change-transform"
               >
                 {hero.secondaryCta.label}
               </button>
             </div>
+          </div>
+        </div>
 
-            <div className="mx-auto mt-7 flex w-full max-w-6xl flex-col gap-3 lg:mt-8 lg:flex-row lg:items-end lg:justify-between lg:px-4">
-              <p
-                ref={bottomLeftRef}
-                className="max-w-xs text-xs font-medium text-foreground will-change-transform lg:text-sm"
-              >
-                {hero.eyebrow}
-              </p>
-              <p
-                ref={bottomRightRef}
-                className="max-w-sm text-xs leading-relaxed text-muted will-change-transform lg:text-right lg:text-sm"
-              >
-                {hero.positioning}
-              </p>
-            </div>
+        <div className="absolute inset-x-0 bottom-0 z-30 px-5 pb-5 lg:px-10 lg:pb-6">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <p
+              ref={bottomLeftRef}
+              className="max-w-xs text-xs font-semibold leading-snug text-foreground will-change-transform lg:text-sm"
+            >
+              {hero.eyebrow}
+            </p>
+            <p
+              ref={bottomRightRef}
+              className="max-w-sm text-xs leading-relaxed text-muted will-change-transform lg:text-right lg:text-sm"
+            >
+              {hero.positioning}
+            </p>
           </div>
         </div>
       </div>

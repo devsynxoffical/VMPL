@@ -10,6 +10,7 @@ import {
 
 type HeroScrollContextValue = {
   progress: number;
+  /** Sidebar shell should be on-screen (logo mid-dock). */
   sidebarVisible: boolean;
   setProgress: (p: number) => void;
 };
@@ -25,7 +26,8 @@ export function HeroScrollProvider({ children }: { children: React.ReactNode }) 
   const lastProgress = useRef(-1);
 
   const setProgress = useCallback((p: number) => {
-    const next = Math.round(p * 40) / 40;
+    // Quantize so React doesn't thrash every scroll frame
+    const next = Math.round(p * 50) / 50;
     if (next === lastProgress.current) return;
     lastProgress.current = next;
     setProgressState(next);
@@ -35,7 +37,8 @@ export function HeroScrollProvider({ children }: { children: React.ReactNode }) 
     <HeroScrollContext.Provider
       value={{
         progress,
-        sidebarVisible: progress > 0.06,
+        // Shell fades in while the wordmark is flying into the header
+        sidebarVisible: progress > 0.32,
         setProgress,
       }}
     >

@@ -18,6 +18,7 @@ export const navItems = [
   { id: "testimonials", label: "Clients" },
   { id: "solutions", label: "Solutions" },
   { id: "team", label: "Team" },
+  { id: "connect", label: "Connect" },
   { id: "faq", label: "FAQ" },
 ] as const;
 
@@ -27,14 +28,14 @@ export const hero = {
   subheadline: "Leads. Funnels. Advertising. Creative. Growth Systems.",
   positioning:
     "Vaishali Media Productions LLC is the company behind a growing ecosystem of brands built to help ambitious businesses solve their biggest growth challenges.",
-  primaryCta: { label: "Find My Solution →", href: "#solutions" },
-  secondaryCta: { label: "View Our Projects ↓", href: "#projects" },
+  primaryCta: { label: "Find My Solution", href: "#solutions" },
+  secondaryCta: { label: "View Projects", href: "#projects" },
   stats: [
-    { value: 5, suffix: "+", label: "Growth Brands" },
-    { value: 7, suffix: "+", label: "Years Building" },
+    { value: "30", suffix: "M+", label: "Spent In Meta Ads" },
+    { value: 13, suffix: "+", label: "Years of Experience" },
   ],
   traits: ["Leads", "Funnels", "Ads", "Creative", "Scale"],
-  bgText: "VMPL",
+  bgText: "VAISHALI",
   headlineLines: ["We Build What", "Businesses Need", "To Grow."],
   scrollHeadline: "Need To Grow.",
 } as const;
@@ -45,6 +46,9 @@ export const growthBrands = [
     href: "https://www.contractorleads.us/",
     logo: "/projects-logo/contractorleads.webp",
     image: "/projects/contractorleads.webp",
+    bg: "/projects/bg/contractorleads.svg",
+    video: "/videos/contractorleads.mov",
+    badge: "Leads & Pipeline",
     description: "Find opportunities before your competitors do.",
     caseDescription:
       "Verified contractor leads, scored and dial-ready for agencies selling to home-service businesses.",
@@ -55,6 +59,9 @@ export const growthBrands = [
     href: "https://milliondollarfunnels.us/",
     logo: "/projects-logo/milliondollarfunnel.webp",
     image: "/projects/milliondollarfunnel.webp",
+    bg: "/projects/bg/milliondollarfunnel.svg",
+    video: "/videos/milliondollarfunnel.mov",
+    badge: "Conversion Architecture",
     description: "Turn attention into action.",
     caseDescription:
       "High-ticket client acquisition systems that turn cold traffic into booked calls.",
@@ -65,6 +72,9 @@ export const growthBrands = [
     href: "https://scalewithads.us/",
     logo: "/projects-logo/scalewithads.webp",
     image: "/projects/scalewithads.webp",
+    bg: "/projects/bg/scalewithads.svg",
+    video: "/videos/scalewithads.mov",
+    badge: "Paid Acquisition",
     description: "Scale what works.",
     caseDescription:
       "Done-for-you Meta ad systems built to double revenue in 90 days.",
@@ -75,6 +85,9 @@ export const growthBrands = [
     href: "https://milliondollarmedia.us/",
     logo: "/projects-logo/milliondollarmedia.webp",
     image: "/projects/milliondollarmedia.webp",
+    bg: "/projects/bg/milliondollarmedia.svg",
+    video: "/videos/milliondollarmedia.mov",
+    badge: "Creative Systems",
     description: "Creative built to get attention.",
     caseDescription:
       "AI-powered video and creative production for high-ticket B2B growth.",
@@ -85,6 +98,9 @@ export const growthBrands = [
     href: "https://roofingsystems.co/",
     logo: "/projects-logo/roofingsystem.webp",
     image: "/projects/roofing.webp",
+    bg: "/projects/bg/roofing.svg",
+    video: "/videos/roofingsystem.mov",
+    badge: "Industry Engine",
     description: "Growth systems built for roofing businesses.",
     caseDescription:
       "Complete roofing client acquisition — ads, funnels, CRM, and booked inspections.",
@@ -256,31 +272,46 @@ export const experience = {
 
 export const projectsSection = {
   label: "Projects",
-  heading: "Personal Projects I've Built.",
+  heading: "One Ecosystem.\nMultiple Growth Solutions.",
+  headingLines: ["One Ecosystem.", "Multiple Growth Solutions."] as const,
   description:
-    "Growth brands and websites I've created — each built to solve a specific business challenge.",
+    "Explore the specialized engines driving predictable revenue, customer acquisition, and market leadership across the VMPL network.",
   cta: { label: "Explore Projects →", href: "#projects" },
   projects: growthBrands.map((brand, i) => ({
     index: String(i + 1).padStart(2, "0"),
     name: brand.name,
     description: brand.caseDescription,
+    badge: brand.badge,
     tags: [...brand.tags],
     href: brand.href,
+    logo: brand.logo,
     image: brand.image,
+    bg: brand.bg,
+    video: brand.video,
   })),
 } as const;
 
 export const capabilities = {
-  label: "What You Get?",
-  eyebrow: "Capabilities Overview",
-  parts: [
-    { type: "text", content: "Leads, creative, and" },
-    { type: "pill", icon: "◈", label: "Systems" },
-    { type: "text", content: "combined — turning" },
-    { type: "pill", icon: "◎", label: "Strategy" },
-    { type: "text", content: "your growth challenges into connected brands that" },
-    { type: "pill", icon: "★", label: "Scale" },
-    { type: "text", content: "feel effortless to run." },
+  label: "Capabilities",
+  heading: "What You Get",
+  description:
+    "Leads, creative, and systems combined — turning growth challenges into connected brands that feel effortless to run.",
+  items: [
+    {
+      icon: "01",
+      title: "Systems",
+      copy: "An ecosystem of brands that plug into each other — so every lead, funnel, and creative piece compounds.",
+    },
+    {
+      icon: "02",
+      title: "Strategy",
+      copy: "Clear paths from attention to revenue. No disconnected vendors. One growth picture.",
+    },
+    {
+      icon: "03",
+      title: "Scale",
+      copy: "Ads, creative, and conversion built to grow with you — not restart every quarter.",
+    },
   ],
 } as const;
 
@@ -377,6 +408,18 @@ export const team = {
       bio: "Turning raw footage into polished video content that drives attention and action.",
     },
   ],
+} as const;
+
+export const statementSection = {
+  id: "connect",
+  solidLines: ["Transform Your", "Growth"] as const,
+  ghostLines: ["Experience", "Journey"] as const,
+  description:
+    "From leads and funnels to ads and creative — Vaishali Media builds connected systems that turn attention into revenue, then keep compounding.",
+  prompt: "Have something in mind?",
+  cta: { label: "Let's Talk", href: "#solutions" },
+  portrait: "/vaishali-kapoor.png",
+  portraitAlt: "Vaishali Kapoor",
 } as const;
 
 export const faq = {
