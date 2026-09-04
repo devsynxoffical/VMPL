@@ -9,7 +9,16 @@ export function Testimonials() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
   const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse)");
+    const sync = () => setIsTouch(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const syncProgress = useCallback(() => {
     const track = trackRef.current;
@@ -56,7 +65,9 @@ export function Testimonials() {
 
     let isDown = false;
     let moved = false;
+    let axis: "x" | "y" | null = null;
     let startX = 0;
+    let startY = 0;
     let scrollLeft = 0;
     let velocity = 0;
     let lastX = 0;
@@ -67,8 +78,9 @@ export function Testimonials() {
       if (e.button !== 0) return;
       isDown = true;
       moved = false;
-      setIsDragging(true);
+      axis = null;
       startX = e.clientX;
+      startY = e.clientY;
       scrollLeft = track.scrollLeft;
       lastX = e.clientX;
       lastTime = performance.now();
@@ -80,6 +92,26 @@ export function Testimonials() {
     const onMove = (e: PointerEvent) => {
       if (!isDown) return;
       const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      if (!axis) {
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+        if (axis === "y") {
+          // Let the page scroll vertically
+          isDown = false;
+          setIsDragging(false);
+          try {
+            track.releasePointerCapture(e.pointerId);
+          } catch {
+            /* already released */
+          }
+          return;
+        }
+        setIsDragging(true);
+      }
+
+      if (axis !== "x") return;
       if (Math.abs(dx) > 3) moved = true;
       e.preventDefault();
       track.scrollLeft = scrollLeft - dx * 1.35;
@@ -187,7 +219,7 @@ export function Testimonials() {
                   : "bg-foreground text-background"
               }`}
             >
-              {isDragging ? "Dragging" : "Drag →"}
+              {isDragging ? (isTouch ? "Swiping" : "Dragging") : isTouch ? "Swipe →" : "Drag →"}
             </span>
           </div>
         </div>
@@ -197,7 +229,7 @@ export function Testimonials() {
         <div
           ref={trackRef}
           data-lenis-prevent
-          className="drag-cursor flex touch-pan-x gap-5 overflow-x-auto scroll-smooth pb-4 pl-4 pr-8 lg:gap-6 lg:pl-[2vw] lg:pr-[2vw]"
+          className="drag-cursor flex snap-x snap-mandatory touch-pan-x gap-4 overflow-x-auto scroll-smooth pb-4 pl-4 pr-8 sm:gap-5 lg:gap-6 lg:pl-[2vw] lg:pr-[2vw]"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           tabIndex={0}
           role="region"
@@ -207,7 +239,7 @@ export function Testimonials() {
             <article
               key={item.name}
               data-card
-              className="reveal-hidden relative flex w-[min(88vw,400px)] shrink-0 flex-col rounded-[26px] border border-foreground/[0.06] bg-white/65 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.04)] backdrop-blur-sm lg:w-[380px] lg:p-7"
+              className="reveal-hidden relative flex w-[min(88vw,400px)] shrink-0 snap-center flex-col rounded-[26px] border border-foreground/[0.06] bg-white/65 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.04)] backdrop-blur-sm lg:w-[380px] lg:p-7"
             >
               <div
                 className="brand-gradient absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl text-lg font-bold text-white"

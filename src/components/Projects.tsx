@@ -284,6 +284,30 @@ export function Projects() {
         };
       });
 
+      mm.add("(max-width: 767px)", () => {
+        const mobileCards = section.querySelectorAll<HTMLElement>(
+          "[data-mobile-project]",
+        );
+        mobileCards.forEach((card) => {
+          gsap.fromTo(
+            card,
+            { y: 40, opacity: 0, scale: 0.96 },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.7,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 88%",
+                toggleActions: "restart none restart none",
+              },
+            },
+          );
+        });
+      });
+
       return () => mm.revert();
     }, section);
 
@@ -298,7 +322,7 @@ export function Projects() {
     >
       <div
         ref={pinRef}
-        className="flex min-h-[100svh] flex-col justify-center py-8 lg:py-10"
+        className="flex flex-col justify-center py-8 md:min-h-[100svh] lg:py-10"
       >
         <div className="mx-auto w-full max-w-[92rem] px-4 lg:px-[2vw]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
@@ -414,6 +438,7 @@ export function Projects() {
           {projectsSection.projects.map((project, index) => (
             <a
               key={`m-${project.name}`}
+              data-mobile-project
               href={project.href}
               target="_blank"
               rel="noopener noreferrer"

@@ -211,13 +211,52 @@ export function Hero() {
     });
 
     mm.add("(max-width: 1023px)", () => {
-      const st = ScrollTrigger.create({
-        trigger: container,
-        start: "top top",
-        end: "bottom top",
-        onUpdate: (self) => setProgress(self.progress),
+      const mobileUi = [
+        headlineRef.current,
+        primaryCtaRef.current,
+        secondaryCtaRef.current,
+        bottomLeftRef.current,
+        bottomRightRef.current,
+      ].filter(Boolean);
+
+      gsap.set(portraitRef.current, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        filter: "blur(0px)",
       });
-      return () => st.kill();
+      gsap.set(bgTextRef.current, { opacity: 1, y: 0, scale: 1 });
+      gsap.set(mobileUi, { opacity: 0, y: 28 });
+
+      const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
+      intro
+        .to(bgTextRef.current, { opacity: 1, duration: 0.5 }, 0)
+        .to(mobileUi, { opacity: 1, y: 0, duration: 0.7, stagger: 0.07 }, 0.15);
+
+      // Soft parallax exit — no pin (keeps native mobile scroll smooth)
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top top",
+          end: "bottom top",
+          scrub: 0.7,
+          onUpdate: (self) => setProgress(self.progress),
+        },
+      });
+
+      tl.to(
+        portraitRef.current,
+        { yPercent: 12, opacity: 0.55, ease: "none" },
+        0,
+      );
+      tl.to(bgTextRef.current, { yPercent: -18, opacity: 0.35, ease: "none" }, 0);
+      tl.to(mobileUi, { y: -36, opacity: 0, ease: "none" }, 0);
+
+      return () => {
+        intro.kill();
+        tl.scrollTrigger?.kill();
+        tl.kill();
+      };
     });
 
     return () => {
@@ -246,7 +285,7 @@ export function Hero() {
 
         <div
           ref={portraitBlurRef}
-          className="pointer-events-none absolute bottom-0 left-1/2 top-[3%] z-[2] w-[min(58vw,780px)] -translate-x-1/2 opacity-0 will-change-transform"
+          className="pointer-events-none absolute bottom-0 left-1/2 top-[8%] z-[2] w-[min(92vw,780px)] -translate-x-1/2 opacity-0 will-change-transform sm:top-[5%] lg:top-[3%] lg:w-[min(58vw,780px)]"
           aria-hidden
         >
           <div className="relative h-full w-full">
@@ -378,7 +417,7 @@ export function Hero() {
         {/* Portrait */}
         <div
           ref={portraitRef}
-          className="pointer-events-none absolute bottom-0 left-1/2 top-[3%] z-20 w-[min(58vw,780px)] -translate-x-1/2 will-change-transform"
+          className="pointer-events-none absolute bottom-0 left-1/2 top-[8%] z-20 w-[min(92vw,780px)] -translate-x-1/2 will-change-transform sm:top-[5%] lg:top-[3%] lg:w-[min(58vw,780px)]"
         >
           <div className="relative h-full w-full">
             <Image
@@ -394,10 +433,10 @@ export function Hero() {
         </div>
 
         {/* Headline + CTAs */}
-        <div className="absolute inset-x-0 bottom-[9%] z-40 flex justify-center px-4">
-          <div className="w-fit max-w-[min(100%,36rem)] text-center">
+        <div className="absolute inset-x-0 bottom-[max(5.5rem,14%)] z-40 flex justify-center px-4 sm:bottom-[12%] lg:bottom-[9%]">
+          <div className="w-full max-w-[min(100%,36rem)] text-center">
             <div ref={headlineRef} className="will-change-transform">
-              <h1 className="text-display text-[clamp(2.6rem,5vw,4.25rem)] font-extrabold leading-[0.98] tracking-[-0.045em] text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.35)]">
+              <h1 className="text-display text-[clamp(2rem,7.5vw,4.25rem)] font-extrabold leading-[0.98] tracking-[-0.045em] text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.35)]">
                 {hero.headlineLines.map((line) => (
                   <span key={line} className="block">
                     {line}
@@ -406,7 +445,25 @@ export function Hero() {
               </h1>
             </div>
 
-            <div className="mt-6 flex flex-nowrap items-center justify-center gap-3 sm:gap-3.5">
+            {/* Mobile stats — SideNav is hidden below lg */}
+            <div className="mt-4 flex items-center justify-center gap-2 lg:hidden">
+              {hero.stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="glass-overlay rounded-2xl px-3 py-2 text-left"
+                >
+                  <div className="text-display text-sm font-extrabold leading-none text-accent">
+                    {stat.value}
+                    {stat.suffix}
+                  </div>
+                  <div className="mt-0.5 max-w-[9ch] text-[9px] font-semibold leading-tight text-foreground/80">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5 sm:mt-6 sm:gap-3.5">
               <button
                 ref={primaryCtaRef}
                 onClick={() => scrollTo("solutions")}
@@ -425,17 +482,17 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 z-30 px-5 pb-5 lg:px-10 lg:pb-6">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="absolute inset-x-0 bottom-0 z-30 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 lg:px-10 lg:pb-6">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 lg:flex-row lg:items-end lg:justify-between lg:gap-3">
             <p
               ref={bottomLeftRef}
-              className="max-w-xs text-xs font-semibold leading-snug text-foreground will-change-transform lg:text-sm"
+              className="max-w-xs text-[11px] font-semibold leading-snug text-foreground will-change-transform sm:text-xs lg:text-sm"
             >
               {hero.eyebrow}
             </p>
             <p
               ref={bottomRightRef}
-              className="max-w-sm text-xs leading-relaxed text-muted will-change-transform lg:text-right lg:text-sm"
+              className="hidden max-w-sm text-xs leading-relaxed text-muted will-change-transform sm:block lg:text-right lg:text-sm"
             >
               {hero.positioning}
             </p>

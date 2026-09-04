@@ -109,7 +109,7 @@ export function StatementSection() {
     <section
       ref={sectionRef}
       id={statementSection.id}
-      className="relative overflow-hidden bg-background px-4 pb-[10vw] pt-[10vw] text-foreground lg:px-[2vw] lg:pb-[8vw] lg:pt-[7vw]"
+      className="relative overflow-hidden bg-background px-4 pb-[10vw] pt-[max(6rem,14vw)] text-foreground sm:pt-[10vw] lg:px-[2vw] lg:pb-[8vw] lg:pt-[7vw]"
     >
       <div
         className="pointer-events-none absolute inset-0"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { navItems, site } from "@/content";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -9,14 +9,32 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   const activeId = useScrollSpy(navItems.map((n) => n.id));
 
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.classList.add("lenis-stopped");
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.documentElement.classList.remove("lenis-stopped");
+    };
+  }, [open]);
+
   const scrollTo = (id: string) => {
     setOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    window.setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
   };
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-4 py-3 glass lg:hidden">
+      <header
+        className={`fixed left-0 right-0 top-0 z-[110] flex items-center justify-between px-4 py-3 lg:hidden ${
+          open ? "bg-background" : "glass"
+        }`}
+        style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
+      >
         <button
           onClick={() => scrollTo("hero")}
           className="focus-ring rounded-lg"
@@ -35,21 +53,36 @@ export function MobileNav() {
       </header>
 
       {open && (
-        <div className="fixed inset-0 z-40 flex flex-col bg-background pt-20 lg:hidden">
-          <nav className="flex flex-1 flex-col gap-2 px-6 py-4">
+        <div
+          className="fixed inset-0 z-[100] flex flex-col bg-background lg:hidden"
+          style={{
+            paddingTop: "max(4.75rem, calc(env(safe-area-inset-top) + 3.75rem))",
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site navigation"
+        >
+          <nav className="flex flex-1 flex-col gap-2 overflow-y-auto px-6 py-4">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
                 className={`focus-ring rounded-2xl px-4 py-4 text-left text-sm font-bold uppercase tracking-wider ${
-                  activeId === item.id ? "brand-gradient text-white" : "bg-white/40"
+                  activeId === item.id
+                    ? "brand-gradient text-white"
+                    : "bg-white text-foreground shadow-[0_1px_0_rgba(0,0,0,0.04)]"
                 }`}
               >
                 {item.label}
               </button>
             ))}
           </nav>
-          <div className="border-t border-foreground/10 p-6">
+          <div
+            className="border-t border-foreground/10 bg-background p-6"
+            style={{
+              paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
+            }}
+          >
             <a href={site.bookingLink} className="btn-primary w-full text-center">
               Find My Solution
             </a>

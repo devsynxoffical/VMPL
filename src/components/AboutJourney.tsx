@@ -537,48 +537,53 @@ export function AboutJourney() {
         return;
       }
 
-      gsap.set(overflow, { height: "0%" });
       revealedRef.current = about.timeline.map(() => false);
 
-      // Reference: height unveil keyframes scrubbed to container scroll
-      gsap.to(overflow, {
-        ease: "none",
-        keyframes: [
-          { height: "14%", duration: 2 },
-          { height: "28%", duration: 1 },
-          { height: "42%", duration: 1.5 },
-          { height: "56%", duration: 2 },
-          { height: "70%", duration: 1 },
-          { height: "84%", duration: 1.5 },
-          { height: "100%", duration: 2 },
-        ],
-        scrollTrigger: {
-          trigger: container,
-          start: "top 90%",
-          end: "bottom 80%",
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            REVEAL_AT.forEach((at, i) => {
-              if (self.progress >= at) playCard(i);
-              else playCard(i, true);
-            });
+      if (isDesktop) {
+        gsap.set(overflow, { height: "0%" });
+
+        // Reference: height unveil keyframes scrubbed to container scroll
+        gsap.to(overflow, {
+          ease: "none",
+          keyframes: [
+            { height: "14%", duration: 2 },
+            { height: "28%", duration: 1 },
+            { height: "42%", duration: 1.5 },
+            { height: "56%", duration: 2 },
+            { height: "70%", duration: 1 },
+            { height: "84%", duration: 1.5 },
+            { height: "100%", duration: 2 },
+          ],
+          scrollTrigger: {
+            trigger: container,
+            start: "top 90%",
+            end: "bottom 80%",
+            scrub: true,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              REVEAL_AT.forEach((at, i) => {
+                if (self.progress >= at) playCard(i);
+                else playCard(i, true);
+              });
+            },
+            onRefresh: (self) => {
+              REVEAL_AT.forEach((at, i) => {
+                if (self.progress >= at) showCardFinal(i);
+                else playCard(i, true);
+              });
+            },
           },
-          onRefresh: (self) => {
-            REVEAL_AT.forEach((at, i) => {
-              if (self.progress >= at) showCardFinal(i);
-              else playCard(i, true);
-            });
-          },
-        },
-      });
+        });
+      } else {
+        gsap.set(overflow, { height: "100%" });
+      }
 
       wrapRefs.current.forEach((wrap, index) => {
         if (!wrap) return;
         ScrollTrigger.create({
           trigger: isDesktop ? container : wrap,
-          start: isDesktop ? CARD_STARTS[index] : "top 82%",
-          end: isDesktop ? "bottom top" : "bottom top",
+          start: isDesktop ? CARD_STARTS[index] : "top 88%",
+          end: "bottom top",
           onEnter: () => playCard(index),
           onEnterBack: () => playCard(index),
           onLeave: () => playCard(index, true),
