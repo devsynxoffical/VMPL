@@ -19,6 +19,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       wheelMultiplier: 0.9,
     });
 
+    window.__vmplLenis = lenis;
+
     ScrollTrigger.scrollerProxy(document.documentElement, {
       scrollTop(value) {
         if (typeof value === "number") {
@@ -50,6 +52,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => {
+      if (window.__vmplLenis === lenis) delete window.__vmplLenis;
       ScrollTrigger.scrollerProxy(document.documentElement, {});
       gsap.ticker.remove(ticker);
       lenis.destroy();

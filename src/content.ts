@@ -143,10 +143,14 @@ export const solutions = {
 } as const;
 
 export const about = {
-  label: "Start Small Grow Big",
-  heading: "About Us (&) Our Journey",
+  label: "Our Journey",
+  heading: "We Never Planned To Build An Ecosystem",
+  headingLines: ["We Never Planned", "To Build An Ecosystem"] as const,
   intro:
-    "Seven years ago we started with one belief — growth only works when every piece connects. What happened after that is easier to show than explain.",
+    "It happened one problem at a time. Every new brand began with a client saying, “We need help with this too”—and us realizing the industry was leaving another important gap unsolved.",
+  closingTitle: "Built From Real Problems",
+  closing:
+    "None of these brands began as a business expansion plan. Each one started with a real conversation, a recurring frustration, and a problem we could no longer ignore. What began as an attempt to improve the industry has grown into one connected ecosystem—built to own the entire journey, not just one small piece of it.",
   workedWithLabel: "We've had the opportunity to work alongside:",
   workedWith: [
     "8 & 9 Figure Business Owners",
@@ -156,25 +160,37 @@ export const about = {
   ],
   timeline: [
     {
+      year: "14–19",
+      fullYear: "2014–19",
+      title: "The Problem I Couldn’t Ignore",
+      teaser:
+        "Five years across three agencies. Same lines every time: we only manage the ads, creatives aren’t included, we don’t handle funnels.",
+      full:
+        "Clients were left coordinating multiple teams, repeating the same brief, and still had no one responsible for the final result. I knew there had to be a better way—one team accountable for the outcome, not another handoff.",
+      attribution: "@vaishalimedia",
+      timeAgo: "the early years",
+      side: "right" as const,
+    },
+    {
       year: "'19",
       fullYear: "2019",
-      title: "The Beginning",
+      title: "Million Dollar Media Was Born",
       teaser:
-        "Vaishali Media Productions LLC was founded with a simple belief: businesses deserve growth systems that actually work together.",
+        "The first problem was creative. Campaigns stalled without content—or got beautiful ads that simply didn’t sell.",
       full:
-        "In 2019, we set out to build something different — not just another agency, but a company that understands how leads, creative, advertising, and funnels connect. The foundation was laid with a focus on delivering real results for ambitious businesses who were tired of disconnected vendors.",
+        "So we launched Million Dollar Media to create content with a purpose: stop the scroll, communicate value, and move people to act. Creative stopped being decoration and became the engine of the campaign.",
       attribution: "@vaishalimedia",
       timeAgo: "7 years ago",
-      side: "right" as const,
+      side: "left" as const,
     },
     {
       year: "'20",
       fullYear: "2020",
-      title: "First Real Clients",
+      title: "Clients Gave Us More Than Business",
       teaser:
-        "The first projects that proved the model. Panic, late nights, and the kind of learning you only get when someone is counting on you.",
+        "Our first clients gave us their trust—and that trust came with responsibility.",
       full:
-        "Practicing ideas was comfortable. Serving real businesses was not. That first year of client work taught us more than any playbook — because every pixel, every funnel step, and every ad dollar suddenly mattered to someone else's livelihood.",
+        "There were long nights, difficult lessons, and moments when giving up would have been easier. Every result strengthened our belief that businesses needed partners who cared about the complete outcome, not a single deliverable.",
       attribution: "@vaishalimedia",
       timeAgo: "6 years ago",
       side: "left" as const,
@@ -182,47 +198,35 @@ export const about = {
     {
       year: "'21",
       fullYear: "2021",
-      title: "First Growth Systems",
+      title: "Scale With Ads Was Born",
       teaser:
-        "We launched our first specialized brands, learning what it takes to solve specific growth challenges at scale.",
+        "Creatives were ready—but who would run the campaigns and scale them?",
       full:
-        "By 2021, we had expanded beyond a single service into specialized growth systems. Each brand was built to solve one problem exceptionally well — because we learned that generic solutions don't scale businesses.",
+        "Sending clients to another agency would have recreated the same fragmented problem we set out to solve. Scale With Ads was launched to connect powerful creative with strategy, media buying, and measurable growth.",
       attribution: "@vaishalimedia",
       timeAgo: "5 years ago",
       side: "right" as const,
     },
     {
-      year: "'22",
-      fullYear: "2022",
-      title: "Creative Meets Conversion",
+      year: "22–23",
+      fullYear: "2022–23",
+      title: "The Next Missing Piece",
       teaser:
-        "Ads without creative die. Creative without a system waste attention. This was the year both became inseparable.",
+        "Ads were generating clicks and leads—but weak pages and broken follow-ups were costing conversions.",
       full:
-        "We stopped treating media and funnels as separate lanes. Campaigns, creative, and conversion paths started living as one connected system — the seed of what would become Million Dollar Media and Million Dollar Funnels.",
+        "Traffic was arriving, yet disconnected customer journeys were leaking results. The campaign wasn’t always the problem. What happened after the click was—and that gap became impossible to ignore.",
       attribution: "@vaishalimedia",
-      timeAgo: "4 years ago",
+      timeAgo: "3–4 years ago",
       side: "left" as const,
-    },
-    {
-      year: "'23",
-      fullYear: "2023",
-      title: "The Ecosystem Takes Shape",
-      teaser:
-        "Multiple brands working together, serving businesses from lead generation to conversion and scale.",
-      full:
-        "The ecosystem model proved itself. Businesses no longer needed five different vendors — they could find the right solution within one connected network of growth brands, each built on years of hands-on experience.",
-      attribution: "@vaishalimedia",
-      timeAgo: "3 years ago",
-      side: "right" as const,
     },
     {
       year: "'24",
       fullYear: "2024",
-      title: "Trust Turns Into Referrals",
+      title: "Million Dollar Funnels Was Born",
       teaser:
-        "No pitch decks required. Clients started sending people our way with one line: work with Vaishali Media.",
+        "We built conversion systems—not just pretty pages—that turn attention into customers.",
       full:
-        "That kind of trust isn't something you put in a case study. It's the outcome of showing up, connecting the pieces, and shipping results that speak louder than marketing claims.",
+        "Million Dollar Funnels connected funnels, CRM, automation, follow-ups, and sales journeys into one path. The goal was simple: turn attention into qualified leads and paying customers, end to end.",
       attribution: "@vaishalimedia",
       timeAgo: "2 years ago",
       side: "left" as const,
@@ -230,14 +234,14 @@ export const about = {
     {
       year: "'26",
       fullYear: "2026",
-      title: "The Journey Continues",
+      title: "Contractor Leads Was Born",
       teaser:
-        "Seven years in. Four brands. One mission — helping ambitious businesses grow with systems that connect.",
+        "We could advertise, create, and convert—but one question kept coming back: how do we find the right prospects?",
       full:
-        "Today, Vaishali Media Productions LLC sits at the center of a growing ecosystem. We've worked alongside 8 and 9 figure business owners, award-winning entrepreneurs, and industry leaders — and the best work is still ahead.",
+        "Contractor Leads was built to close that final gap—helping agencies discover, verify, and reach high-potential prospects through one AI-powered platform. The ecosystem finally covered the full journey.",
       attribution: "@vaishalimedia",
       timeAgo: "now",
-      side: "right" as const,
+      side: "left" as const,
     },
   ],
 } as const;
@@ -247,7 +251,7 @@ export const experience = {
   heading: "Built Through Experience.",
   founded: "Founded In 2019.",
   intro:
-    "What started as a single focus has grown into a full ecosystem of growth solutions — each brand solving a specific challenge businesses face every day.",
+    "What started as one unsolved problem has grown into a full ecosystem of growth solutions — each brand born from a real client gap we could no longer ignore.",
   timeline: about.timeline,
   workedWith: about.workedWith,
 } as const;
@@ -374,33 +378,78 @@ export const team = {
   label: "Our People",
   heading: "The People Behind The Work.",
   description:
-    "Meet the people building, creating, and growing the Vaishali Media ecosystem.",
-  cta: { label: "Meet The Team →", href: "#team" },
-  members: [
-    {
-      name: "Vaishali Kapoor",
-      role: "Founder",
-      image: "/vaishali-kapoor.png",
-      bio: "Building the vision behind Vaishali Media and the growth brands in the ecosystem.",
-    },
-    {
-      name: "Gaurav Kapoor",
-      role: "Co-Founder",
-      image: "/team/gaurav.jpeg",
-      bio: "Partnering on strategy, operations, and scaling the business across every brand.",
-    },
-    {
-      name: "Taqi Jafar",
-      role: "Graphic Designer",
-      image: "/team/Taqi.jpeg",
-      bio: "Crafting visual identity and creative assets that make every campaign stand out.",
-    },
-    {
-      name: "Ali Jawed",
-      role: "Video Editor",
-      image: "/team/Ali.jpeg",
-      bio: "Turning raw footage into polished video content that drives attention and action.",
-    },
+    "One connected team across creative, media, funnels, and growth — building the Vaishali Media ecosystem together.",
+  cta: { label: "Work With Us →", href: "#solutions" },
+  /** Hierarchy: 1 → 2 → 3 → 4 people per level (10 total) */
+  levels: [
+    [
+      {
+        name: "Vaishali Kapoor",
+        role: "Founder",
+        image: "/vaishali-kapoor.png",
+        bio: "Vision behind Vaishali Media and the full growth ecosystem.",
+      },
+    ],
+    [
+      {
+        name: "Gaurav Kapoor",
+        role: "Co-Founder",
+        image: "/team/gaurav.jpeg",
+        bio: "Strategy, operations, and scaling across every brand.",
+      },
+      {
+        name: "Taqi Jafar",
+        role: "Creative Lead",
+        image: "/team/Taqi.jpeg",
+        bio: "Visual identity and creative that makes campaigns stand out.",
+      },
+    ],
+    [
+      {
+        name: "Ali Jawed",
+        role: "Video Editor",
+        image: "/team/Ali.jpeg",
+        bio: "Video that stops the scroll and drives action.",
+      },
+      {
+        name: "Sara Malik",
+        role: "Media Buyer",
+        image: null,
+        bio: "Paid campaigns with sharp testing and clean reporting.",
+      },
+      {
+        name: "Omar Riaz",
+        role: "Funnel Strategist",
+        image: null,
+        bio: "Journeys that turn traffic into conversations.",
+      },
+    ],
+    [
+      {
+        name: "Hina Qureshi",
+        role: "Copywriter",
+        image: null,
+        bio: "Words that clarify the offer and move people to click.",
+      },
+      {
+        name: "Daniel Brooks",
+        role: "Account Manager",
+        image: null,
+        bio: "Keeping clients aligned and moving forward.",
+      },
+      {
+        name: "Maya Singh",
+        role: "Motion Designer",
+        image: null,
+        bio: "Motion that gives creative real presence.",
+      },
+      {
+        name: "Noah Patel",
+        role: "Growth Analyst",
+        image: null,
+        bio: "Data into the next experiment worth running.",
+      },
+    ],
   ],
 } as const;
 

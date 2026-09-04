@@ -1,102 +1,123 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { gsap, registerGsap, ScrollTrigger } from "@/lib/gsap";
+import { registerGsap, ScrollTrigger } from "@/lib/gsap";
+
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    __vmplLenis?: any;
+  }
+}
 
 /**
- * Sidebar active section.
- * Picks the last nav section that still crosses a viewport probe line —
- * and requires the section bottom to still be on-screen so tall GSAP
- * pin spacers (Projects / Hero) don't stay active forever.
+ * Sidebar active section: last nav section whose top edge has crossed
+ * a probe line (~32% down the viewport). Works with GSAP pins because
+ * hero/projects ids sit on the pinned panel (not the tall spacer).
  */
-export function useScrollSpy(
-  sectionIds: readonly string[],
-  offsetRatio = 0.3,
-) {
+export function useScrollSpy(sectionIds: readonly string[]) {
   const [activeId, setActiveId] = useState(sectionIds[0] ?? "");
+  // Stable primitive — avoids HMR / array-identity effect breakage
+  const idsKey = sectionIds.join("|");
 
   useEffect(() => {
-    if (!sectionIds.length || typeof window === "undefined") return;
+    if (!idsKey || typeof window === "undefined") return;
+    const ids = idsKey.split("|").filter(Boolean);
+    if (!ids.length) return;
+
     registerGsap();
 
-    let raf = 0;
+    let cancelled = false;
+    let ticking = false;
+    let lenis: { on?: Function; off?: Function; scroll?: number } | null =
+      null;
 
-    const update = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const probe = window.innerHeight * offsetRatio;
-        const minBottom = window.innerHeight * 0.12;
-        let current = sectionIds[0];
-        let found = false;
+    const resolveActive = () => {
+      if (cancelled) return;
 
-        for (const id of sectionIds) {
-          const el = document.getElementById(id);
-          if (!el) continue;
-          const rect = el.getBoundingClientRect();
-          // Must have crossed the probe AND still occupy the viewport
-          if (rect.top <= probe && rect.bottom > minBottom) {
-            current = id;
-            found = true;
-          }
+      const probe = window.innerHeight * 0.32;
+      let current = ids[0];
+
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        // Last section whose top has crossed the probe wins
+        if (el.getBoundingClientRect().top <= probe) {
+          current = id;
         }
+      }
 
-        const scrollY =
-          window.scrollY ||
-          document.documentElement.scrollTop ||
-          0;
-        const docH = Math.max(
-          document.documentElement.scrollHeight,
-          document.body.scrollHeight,
-        );
-        if (scrollY + window.innerHeight >= docH - 48) {
-          current = sectionIds[sectionIds.length - 1];
-          found = true;
-        }
+      const scrollY =
+        lenis?.scroll ??
+        window.__vmplLenis?.scroll ??
+        window.scrollY ??
+        document.documentElement.scrollTop ??
+        0;
+      const docH = Math.max(
+        document.documentElement.scrollHeight,
+        document.body.scrollHeight,
+      );
+      if (scrollY + window.innerHeight >= docH - 48) {
+        current = ids[ids.length - 1];
+      }
 
-        if (!found) {
-          const mid = window.innerHeight * 0.4;
-          let bestDist = Infinity;
-          for (const id of sectionIds) {
-            const el = document.getElementById(id);
-            if (!el) continue;
-            const rect = el.getBoundingClientRect();
-            const center = rect.top + rect.height / 2;
-            const dist = Math.abs(center - mid);
-            if (dist < bestDist) {
-              bestDist = dist;
-              current = id;
-            }
-          }
-        }
+      setActiveId((prev) => (prev === current ? prev : current));
+    };
 
-        setActiveId((prev) => (prev === current ? prev : current));
+    const requestUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        resolveActive();
       });
     };
 
-    update();
+    // Whole-page ScrollTrigger stays in sync with Lenis scrollerProxy
+    const pageTrigger = ScrollTrigger.create({
+      start: 0,
+      end: "max",
+      onUpdate: requestUpdate,
+      onRefresh: requestUpdate,
+    });
 
-    document.addEventListener("lenisScroll", update);
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    gsap.ticker.add(update);
-    ScrollTrigger.addEventListener("refresh", update);
+    document.addEventListener("lenisScroll", requestUpdate);
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
 
-    const t1 = window.setTimeout(update, 120);
-    const t2 = window.setTimeout(update, 500);
-    const t3 = window.setTimeout(update, 1200);
+    const bindLenis = () => {
+      const instance = window.__vmplLenis;
+      if (!instance?.on || instance === lenis) return Boolean(instance?.on);
+      if (lenis?.off) lenis.off("scroll", requestUpdate);
+      lenis = instance;
+      instance.on("scroll", requestUpdate);
+      return true;
+    };
+
+    bindLenis();
+    const lenisPoll = window.setInterval(() => {
+      if (bindLenis()) window.clearInterval(lenisPoll);
+    }, 100);
+    window.setTimeout(() => window.clearInterval(lenisPoll), 3000);
+
+    resolveActive();
+    const t1 = window.setTimeout(requestUpdate, 120);
+    const t2 = window.setTimeout(requestUpdate, 500);
+    const t3 = window.setTimeout(requestUpdate, 1200);
 
     return () => {
-      cancelAnimationFrame(raf);
-      document.removeEventListener("lenisScroll", update);
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      gsap.ticker.remove(update);
-      ScrollTrigger.removeEventListener("refresh", update);
+      cancelled = true;
+      pageTrigger.kill();
+      document.removeEventListener("lenisScroll", requestUpdate);
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+      if (lenis?.off) lenis.off("scroll", requestUpdate);
+      window.clearInterval(lenisPoll);
       window.clearTimeout(t1);
       window.clearTimeout(t2);
       window.clearTimeout(t3);
     };
-  }, [sectionIds, offsetRatio]);
+  }, [idsKey]);
 
   return activeId;
 }

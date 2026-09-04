@@ -63,7 +63,10 @@ function nodeStyle(index: number): CSSProperties {
 }
 
 function yearNumber(fullYear: string) {
-  return Number(fullYear.slice(2));
+  // Prefer the last 4-digit year so ranges like "2014–2019" count to '19
+  const match = fullYear.match(/(\d{4})(?!.*\d{4})/);
+  const year = match?.[1] ?? fullYear.replace(/\D/g, "").slice(0, 4);
+  return Number(year.slice(2));
 }
 
 function formatYear(n: number) {
@@ -636,20 +639,17 @@ export function AboutJourney() {
             ref={headingRef}
             className="text-display mt-5 text-[clamp(2.25rem,5.5vw,4rem)] font-extrabold leading-[0.96] tracking-tight"
           >
-            <span className="journey-split">
-              <span data-line className="journey-split-line block">
-                About Us (&)
+            {about.headingLines.map((line) => (
+              <span key={line} className="journey-split">
+                <span data-line className="journey-split-line block">
+                  {line}
+                </span>
               </span>
-            </span>
-            <span className="journey-split">
-              <span data-line className="journey-split-line block">
-                Our Journey
-              </span>
-            </span>
+            ))}
           </h2>
           <p
             ref={introRef}
-            className="mt-4 max-w-[40ch] text-[15px] leading-relaxed text-muted lg:text-base"
+            className="mt-4 max-w-[46ch] text-[15px] leading-relaxed text-muted lg:text-base"
           >
             {about.intro}
           </p>
@@ -696,6 +696,15 @@ export function AboutJourney() {
           className="pointer-events-none hidden h-[min(10vw,120px)] md:block"
           aria-hidden
         />
+
+        <div className="relative z-10 mx-auto mt-10 max-w-2xl pb-[6vw] text-center md:mt-6 lg:pb-[4vw]">
+          <h3 className="text-display text-[clamp(1.65rem,3.2vw,2.5rem)] font-extrabold leading-tight tracking-tight">
+            {about.closingTitle}
+          </h3>
+          <p className="mx-auto mt-4 max-w-[48ch] text-[15px] leading-relaxed text-muted lg:text-base">
+            {about.closing}
+          </p>
+        </div>
       </div>
     </section>
   );

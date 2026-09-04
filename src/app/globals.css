@@ -784,3 +784,76 @@ body {
     will-change: auto;
   }
 }
+
+/* Team org tree */
+.team-org-card {
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 36px rgba(40, 10, 40, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    border-color 0.3s ease;
+}
+
+.team-org-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(230, 43, 118, 0.28);
+  box-shadow: 0 22px 48px rgba(230, 43, 118, 0.14);
+}
+
+.team-org-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0.15rem 0 0;
+}
+
+.team-org-stem {
+  width: 2px;
+  height: 1.35rem;
+  background: linear-gradient(180deg, #e62b76, #7b228d);
+  border-radius: 999px;
+}
+
+.team-org-bar-wrap {
+  position: relative;
+  width: min(92%, calc(var(--kids, 2) * 9.5rem));
+  max-width: 56rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.team-org-bar {
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, #e62b76, #7b228d 50%, #e62b76);
+  border-radius: 999px;
+  transform-origin: center;
+}
+
+.team-org-drops {
+  display: grid;
+  grid-template-columns: repeat(var(--kids, 2), 1fr);
+  width: 100%;
+}
+
+.team-org-drop {
+  display: block;
+  width: 2px;
+  height: 1.35rem;
+  margin-inline: auto;
+  background: linear-gradient(180deg, #7b228d, #e62b76);
+  border-radius: 999px;
+}
+
+@media (max-width: 639px) {
+  .team-org-bar-wrap {
+    width: min(88%, calc(var(--kids, 2) * 6.5rem));
+  }
+}
+
