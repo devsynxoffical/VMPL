@@ -202,8 +202,8 @@ export function Team() {
   }, [reducedMotion]);
 
   const sizeForLevel = (count: number): "sm" | "md" | "lg" => {
-    if (count <= 1) return "lg";
-    if (count <= 2) return "md";
+    if (count <= 2) return "lg";
+    if (count <= 3) return "md";
     return "sm";
   };
 
@@ -250,11 +250,13 @@ export function Team() {
                     <div
                       key={member.name}
                       className={`flex justify-center ${
-                        size === "lg"
-                          ? "w-full sm:w-auto"
-                          : size === "md"
-                            ? "w-[calc(50%-0.5rem)] min-w-[10rem] sm:w-auto"
-                            : "w-[calc(50%-0.5rem)] min-w-[9rem] sm:w-auto lg:w-auto"
+                        level.length === 2
+                          ? "w-[calc(50%-0.5rem)] min-w-[10rem] sm:w-auto"
+                          : size === "lg"
+                            ? "w-full sm:w-auto"
+                            : size === "md"
+                              ? "w-[calc(50%-0.5rem)] min-w-[10rem] sm:w-auto"
+                              : "w-[calc(50%-0.5rem)] min-w-[9rem] sm:w-auto lg:w-auto"
                       }`}
                     >
                       <TeamCard member={member} size={size} />

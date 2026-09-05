@@ -359,7 +359,7 @@ export const team = {
   description:
     "One connected team across creative, media, funnels, and growth — building the Vaishali Media ecosystem together.",
   cta: { label: "Work With Us →", href: "#solutions" },
-  /** Hierarchy: 1 → 2 → 3 → 4 people per level (10 total) */
+  /** Hierarchy: founders together on top, then the rest of the team below */
   levels: [
     [
       {
@@ -368,22 +368,20 @@ export const team = {
         image: "/vaishali-kapoor.png",
         bio: "Vision behind Vaishali Media and the full growth ecosystem.",
       },
-    ],
-    [
       {
         name: "Gaurav Kapoor",
         role: "Co-Founder",
         image: "/team/gaurav.jpeg",
         bio: "Strategy, operations, and scaling across every brand.",
       },
+    ],
+    [
       {
         name: "Taqi Jafar",
         role: "Creative Lead",
         image: "/team/taqi.jpeg",
         bio: "Visual identity and creative that makes campaigns stand out.",
       },
-    ],
-    [
       {
         name: "Ali Jawed",
         role: "Video Editor",
