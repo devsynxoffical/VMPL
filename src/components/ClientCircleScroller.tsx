@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { faq } from "@/content";
+import { featuredClients } from "@/content";
 
 type Props = {
   /** Reverse marquee direction */
@@ -9,31 +9,37 @@ type Props = {
   className?: string;
 };
 
-/** Small circular client portraits in an infinite horizontal scroller. */
+/** Client portraits + names in a sidebar-logo-style infinite scroller. */
 export function ClientCircleScroller({ reverse = false, className = "" }: Props) {
-  const images = faq.clientImages;
-  const loop = [...images, ...images];
+  const loop = [...featuredClients, ...featuredClients];
 
   return (
     <div
-      className={`client-circle-scroller ${className}`}
-      aria-label="Clients"
+      className={`client-circle-scroller rounded-[18px] bg-white/70 px-1 py-2.5 ${className}`}
+      aria-label="Clients we've worked with"
     >
       <div
         className={
-          reverse ? "marquee-track-reverse items-center" : "marquee-track items-center"
+          reverse ? "marquee-track items-end" : "marquee-track items-end"
         }
       >
-        {loop.map((src, i) => (
-          <div key={`${src}-${i}`} className="client-circle-item">
-            <Image
-              src={src}
-              alt=""
-              width={56}
-              height={56}
-              className="h-full w-full object-cover object-top"
-              sizes="56px"
-            />
+        {loop.map((client, i) => (
+          <div
+            key={`${client.image}-${i}`}
+            className="client-circle-item"
+            aria-hidden={i >= featuredClients.length}
+          >
+            <div className="client-circle-avatar">
+              <Image
+                src={client.image}
+                alt={i < featuredClients.length ? client.name : ""}
+                width={64}
+                height={64}
+                className="h-full w-full object-cover object-top"
+                sizes="64px"
+              />
+            </div>
+            <p className="client-circle-name">{client.name}</p>
           </div>
         ))}
       </div>

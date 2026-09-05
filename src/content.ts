@@ -442,30 +442,101 @@ export const statementSection = {
   portraitAlt: "Vaishali Kapoor",
 } as const;
 
+/** Named clients featured on Million Dollar Media — keep names exact */
+export const featuredClients = [
+  {
+    name: "Pierce Grimes",
+    role: "7 Figure Agency Owner",
+    image: "/clients/client-pierce.webp",
+  },
+  {
+    name: "Darrell Stern",
+    role: "Webinar Scaling Coach",
+    image: "/clients/client-darrell.jpg",
+  },
+  {
+    name: "Tim Burd",
+    role: "9 Figure Agency Owner",
+    image: "/clients/client-tim-burd.webp",
+  },
+  {
+    name: "Marie Grace Berg",
+    role: "Agency Owner",
+    image: "/clients/client-marie.jpg",
+  },
+  {
+    name: "Jesse Rogers",
+    role: "Online Trading Coach",
+    image: "/clients/client-jesse.webp",
+  },
+  {
+    name: "Sarah Grace Fitness",
+    role: "NPC Figure Competitor",
+    image: "/clients/client-sarah.jpg",
+  },
+  {
+    name: "Jared Van Yperen",
+    role: "Founder @ Vintage Muscle",
+    image: "/clients/client-jared.jpg",
+  },
+  {
+    name: "Jimmy Rutkowsky",
+    role: "7 Figure Agency Owner",
+    image: "/clients/client-jimmy.webp",
+  },
+  {
+    name: "Mark Shay",
+    role: "Agency Owner & Coach",
+    image: "/clients/client-mark.jpg",
+  },
+  {
+    name: "Steven Juergensen",
+    role: "Founder @ Vedgenutrition",
+    image: "/clients/client-steven.jpg",
+  },
+  {
+    name: "Rafael Cintron",
+    role: "E-commerce Coach",
+    image: "/clients/client-rafael.jpg",
+  },
+  {
+    name: "Aref Jomah",
+    role: "7 Figure Agency Scaling Coach",
+    image: "/clients/client-aref.jpg",
+  },
+  {
+    name: "Dr. Amy",
+    role: "Cancer Researcher",
+    image: "/clients/client-dr-amy.webp",
+  },
+  {
+    name: "Dr. Bea Kinderaerztin",
+    role: "Pediatrician",
+    image: "/clients/client-dr-bea.jpg",
+  },
+  {
+    name: "M Mahdi Syed",
+    role: "Business Scaling Coach",
+    image: "/clients/client-mahdi.jpg",
+  },
+  {
+    name: "Officer Baker",
+    role: "Hollywood Celebrity",
+    image: "/clients/client-officer-baker.jpg",
+  },
+  {
+    name: "Travis Stephenson",
+    role: "9 Figure Agency Owner",
+    image: "/clients/client-travis.webp",
+  },
+] as const;
+
 export const faq = {
   displayText: "VMPL",
   label: "FAQ",
   heading: "Got any questions?",
-  /** Client portraits used inside the giant VMPL letter mask + circle scrollers */
-  clientImages: [
-    "/clients/client-pierce.webp",
-    "/clients/client-darrell.jpg",
-    "/clients/client-tim-burd.webp",
-    "/clients/client-marie.jpg",
-    "/clients/client-jesse.webp",
-    "/clients/client-sarah.jpg",
-    "/clients/client-jared.jpg",
-    "/clients/client-jimmy.webp",
-    "/clients/client-mark.jpg",
-    "/clients/client-steven.jpg",
-    "/clients/client-rafael.jpg",
-    "/clients/client-aref.jpg",
-    "/clients/client-dr-amy.webp",
-    "/clients/client-dr-bea.jpg",
-    "/clients/client-mahdi.jpg",
-    "/clients/client-officer-baker.jpg",
-    "/clients/client-travis.webp",
-  ],
+  /** Client portraits used inside the giant VMPL letter mask */
+  clientImages: featuredClients.map((c) => c.image),
   items: [
     {
       question: "What does Vaishali Media Productions actually do?",

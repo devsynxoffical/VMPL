@@ -147,7 +147,7 @@ body {
   animation-play-state: paused;
 }
 
-/* Small circular client portrait scroller */
+/* Client portrait + name scroller (sidebar-logo style strip) */
 .client-circle-scroller {
   width: 100%;
   max-width: none;
@@ -156,38 +156,68 @@ body {
   mask-image: linear-gradient(
     90deg,
     transparent 0%,
-    #000 6%,
-    #000 94%,
+    #000 5%,
+    #000 95%,
     transparent 100%
   );
   -webkit-mask-image: linear-gradient(
     90deg,
     transparent 0%,
-    #000 6%,
-    #000 94%,
+    #000 5%,
+    #000 95%,
     transparent 100%
   );
 }
 
 .client-circle-item {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   flex-shrink: 0;
-  width: 3rem;
-  height: 3rem;
-  margin-inline: 0.4rem;
+  width: 4.75rem;
+  margin-inline: 0.35rem;
+  text-align: center;
+}
+
+.client-circle-avatar {
+  position: relative;
+  width: 3.15rem;
+  height: 3.15rem;
   border-radius: 9999px;
   overflow: hidden;
   background: #ebe4ef;
   box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 0 2px rgba(255, 255, 255, 0.95),
     0 6px 16px rgba(123, 34, 141, 0.12);
+}
+
+.client-circle-name {
+  margin-top: 0.4rem;
+  max-width: 100%;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--foreground);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 @media (min-width: 768px) {
   .client-circle-item {
-    width: 3.35rem;
-    height: 3.35rem;
-    margin-inline: 0.5rem;
+    width: 5.5rem;
+    margin-inline: 0.45rem;
+  }
+
+  .client-circle-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .client-circle-name {
+    font-size: 10px;
   }
 }
 

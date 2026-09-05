@@ -300,7 +300,7 @@ export function Testimonials() {
         </div>
       </div>
 
-      <div className="relative z-10 mt-8 w-full lg:mt-10">
+      <div className="relative z-10 mt-8 w-full px-4 lg:mt-10 lg:px-[2vw]">
         <ClientCircleScroller />
       </div>
 
