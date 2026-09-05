@@ -167,7 +167,7 @@ function CapabilityChip({
         <span className="capa-chip-panel-inner">
           <ChipGlyph id={chip.id} large />
           <span className="capa-chip-panel-title">{chip.title}</span>
-          <span className="capa-chip-panel-copy">{chip.copy}</span>
+          <p className="capa-chip-panel-copy">{chip.copy}</p>
         </span>
       </span>
     </span>
