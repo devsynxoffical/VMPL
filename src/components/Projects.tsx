@@ -29,11 +29,11 @@ type ProjectItem = (typeof projectsSection.projects)[number];
 function ProjectCardMedia({
   project,
   videoRef,
-  autoPlay,
+  showVideo = true,
 }: {
   project: ProjectItem;
   videoRef?: (el: HTMLVideoElement | null) => void;
-  autoPlay?: boolean;
+  showVideo?: boolean;
 }) {
   return (
     <>
@@ -51,24 +51,33 @@ function ProjectCardMedia({
       {/* Device screen fills the mid card; copy overlays the bottom */}
       <div className="project-screen pointer-events-none absolute inset-x-[5%] top-[13%] bottom-[20%] z-[5]">
         <div className="relative h-full w-full overflow-hidden rounded-[1.1rem] border border-white/30 bg-[#0b0b0b] shadow-[0_24px_60px_rgba(0,0,0,0.55)] ring-1 ring-black/40 transition-transform duration-700 ease-out group-hover:scale-[1.02] lg:rounded-[1.25rem]">
-          <video
-            ref={videoRef}
-            data-project-video
-            src={project.video}
-            poster={project.image}
-            className="absolute inset-0 h-full w-full object-cover object-top"
-            muted
-            loop
-            playsInline
-            autoPlay={autoPlay}
-            preload="metadata"
-            controls={false}
-            disablePictureInPicture
-            disableRemotePlayback
-            controlsList="nodownload nofullscreen noremoteplayback"
-            aria-hidden
-            tabIndex={-1}
-          />
+          {showVideo ? (
+            <video
+              ref={videoRef}
+              data-project-video
+              src={project.video}
+              poster={project.image}
+              className="absolute inset-0 h-full w-full object-cover object-top"
+              muted
+              loop
+              playsInline
+              autoPlay
+              preload="auto"
+              controls={false}
+              disablePictureInPicture
+              disableRemotePlayback
+              controlsList="nodownload nofullscreen noremoteplayback"
+              aria-hidden
+              tabIndex={-1}
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={project.image}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover object-top"
+            />
+          )}
         </div>
       </div>
     </>
@@ -85,225 +94,95 @@ export function Projects() {
   const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const activeIndexRef = useRef(0);
+  const [isDesktop, setIsDesktop] = useState(true);
   const reducedMotion = useReducedMotion();
 
-  const sectionInViewRef = useRef(false);
-
   useEffect(() => {
-    activeIndexRef.current = activeIndex;
-  }, [activeIndex]);
+    const mq = window.matchMedia("(min-width: 768px)");
+    const sync = () => setIsDesktop(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
+  // Keep project videos playing from mount — no scroll-gated pause
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
-    /** True only if no ancestor is display:none / visibility:hidden */
-    const isEffectivelyVisible = (el: HTMLElement) => {
-      let node: HTMLElement | null = el;
-      while (node && node !== section) {
-        const style = window.getComputedStyle(node);
-        if (style.display === "none" || style.visibility === "hidden") {
-          return false;
-        }
-        node = node.parentElement;
-      }
-      return true;
-    };
-
     const getVideos = () =>
       Array.from(
         section.querySelectorAll<HTMLVideoElement>("video[data-project-video]"),
-      ).filter(isEffectivelyVisible);
+      );
 
     const forcePlay = (video: HTMLVideoElement) => {
       video.muted = true;
       video.defaultMuted = true;
+      video.setAttribute("muted", "");
       video.playsInline = true;
       video.loop = true;
       if (video.preload !== "auto") video.preload = "auto";
 
       const run = () => {
-        if (!sectionInViewRef.current) return;
         const play = video.play();
         if (play && typeof play.catch === "function") {
           play.catch(() => {
             window.setTimeout(() => {
-              if (!sectionInViewRef.current) return;
               video.play().catch(() => {});
-            }, 250);
+            }, 200);
           });
         }
       };
 
-      if (video.readyState >= 2) {
-        run();
-      } else {
-        const onReady = () => run();
-        video.addEventListener("loadeddata", onReady, { once: true });
-        video.addEventListener("canplay", onReady, { once: true });
+      if (video.readyState >= 2) run();
+      else {
+        video.addEventListener("loadeddata", run, { once: true });
+        video.addEventListener("canplay", run, { once: true });
       }
     };
 
-    /**
-     * Only decode the active card ±1. Playing every desktop+mobile clone
-     * (or all 4 HD clips at once) makes Chrome pause everything mid-scrub.
-     */
-    const syncPlayback = () => {
-      if (!sectionInViewRef.current) {
-        getVideos().forEach((video) => video.pause());
-        return;
-      }
-
-      const desktop = window.matchMedia("(min-width: 768px)").matches;
-      const active = activeIndexRef.current;
-
-      getVideos().forEach((video) => {
-        const card = video.closest("a");
-        if (!card) return;
-
-        if (!desktop) {
-          // Mobile stack: play when the card is near the viewport
-          const rect = card.getBoundingClientRect();
-          const near =
-            rect.bottom > 0 &&
-            rect.top < window.innerHeight &&
-            rect.top < window.innerHeight * 0.92;
-          if (near) forcePlay(video);
-          else video.pause();
-          return;
-        }
-
-        const cards = cardRefs.current.filter(Boolean) as HTMLAnchorElement[];
-        const index = cards.indexOf(card as HTMLAnchorElement);
-        if (index < 0) {
-          video.pause();
-          return;
-        }
-        if (Math.abs(index - active) <= 1) forcePlay(video);
-        else video.pause();
-      });
+    const playAll = () => {
+      getVideos().forEach(forcePlay);
     };
 
-    const pauseAll = () => {
-      section
-        .querySelectorAll<HTMLVideoElement>("video[data-project-video]")
-        .forEach((video) => video.pause());
-    };
+    playAll();
 
     const onStall = (e: Event) => {
-      const video = e.currentTarget as HTMLVideoElement;
-      if (!sectionInViewRef.current) return;
-      forcePlay(video);
+      forcePlay(e.currentTarget as HTMLVideoElement);
     };
 
-    registerGsap();
-
-    const bindStallHandlers = () => {
-      section
-        .querySelectorAll<HTMLVideoElement>("video[data-project-video]")
-        .forEach((video) => {
-          video.addEventListener("stalled", onStall);
-          video.addEventListener("error", onStall);
-        });
+    const bind = () => {
+      getVideos().forEach((video) => {
+        video.addEventListener("stalled", onStall);
+        video.addEventListener("error", onStall);
+      });
     };
+    bind();
 
-    const unbindStallHandlers = () => {
-      section
-        .querySelectorAll<HTMLVideoElement>("video[data-project-video]")
-        .forEach((video) => {
-          video.removeEventListener("stalled", onStall);
-          video.removeEventListener("error", onStall);
-        });
+    const watchdog = window.setInterval(playAll, 500);
+    const onVisible = () => {
+      if (!document.hidden) playAll();
     };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", playAll);
 
-    bindStallHandlers();
-
-    // Stay active whenever the projects block intersects the viewport
-    const st = ScrollTrigger.create({
-      trigger: section,
-      start: "top bottom",
-      end: "bottom top",
-      onToggle: (self) => {
-        sectionInViewRef.current = self.isActive;
-        if (self.isActive) syncPlayback();
-        else pauseAll();
-      },
-      onRefresh: (self) => {
-        sectionInViewRef.current = self.isActive;
-        if (self.isActive) syncPlayback();
-      },
-    });
-
-    sectionInViewRef.current = st.isActive;
-    if (st.isActive) syncPlayback();
-
-    const watchdog = window.setInterval(() => {
-      if (!sectionInViewRef.current) return;
-      syncPlayback();
-    }, 700);
-
-    const t1 = window.setTimeout(syncPlayback, 200);
-    const t2 = window.setTimeout(syncPlayback, 800);
-
-    const onMq = () => syncPlayback();
-    const mq = window.matchMedia("(min-width: 768px)");
-    mq.addEventListener("change", onMq);
+    const t1 = window.setTimeout(playAll, 100);
+    const t2 = window.setTimeout(playAll, 500);
+    const t3 = window.setTimeout(playAll, 1500);
 
     return () => {
       window.clearInterval(watchdog);
       window.clearTimeout(t1);
       window.clearTimeout(t2);
-      mq.removeEventListener("change", onMq);
-      unbindStallHandlers();
-      st.kill();
-      pauseAll();
+      window.clearTimeout(t3);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", playAll);
+      getVideos().forEach((video) => {
+        video.removeEventListener("stalled", onStall);
+        video.removeEventListener("error", onStall);
+      });
     };
-  }, []);
-
-  // Re-sync when the centered card changes during horizontal scrub
-  useEffect(() => {
-    if (!sectionInViewRef.current) return;
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const desktop = window.matchMedia("(min-width: 768px)").matches;
-    if (!desktop) return;
-
-    const isEffectivelyVisible = (el: HTMLElement) => {
-      let node: HTMLElement | null = el;
-      while (node && node !== section) {
-        const style = window.getComputedStyle(node);
-        if (style.display === "none" || style.visibility === "hidden") {
-          return false;
-        }
-        node = node.parentElement;
-      }
-      return true;
-    };
-
-    const videos = Array.from(
-      section.querySelectorAll<HTMLVideoElement>("video[data-project-video]"),
-    ).filter(isEffectivelyVisible);
-
-    videos.forEach((video) => {
-      const card = video.closest("a");
-      const cards = cardRefs.current.filter(Boolean) as HTMLAnchorElement[];
-      const index = card ? cards.indexOf(card as HTMLAnchorElement) : -1;
-      if (index < 0) {
-        video.pause();
-        return;
-      }
-      if (Math.abs(index - activeIndex) <= 1) {
-        video.muted = true;
-        video.playsInline = true;
-        video.loop = true;
-        video.play().catch(() => {});
-      } else {
-        video.pause();
-      }
-    });
-  }, [activeIndex]);
+  }, [isDesktop]);
 
   useEffect(() => {
     registerGsap();
@@ -527,6 +406,7 @@ export function Projects() {
               >
                 <ProjectCardMedia
                   project={project}
+                  showVideo={isDesktop}
                   videoRef={(el) => {
                     videoRefs.current[index] = el;
                   }}
@@ -587,7 +467,7 @@ export function Projects() {
               rel="noopener noreferrer"
               className="project-card focus-ring group relative isolate flex min-h-[72vh] w-full flex-col overflow-hidden rounded-[1.75rem] bg-[#111]"
             >
-              <ProjectCardMedia project={project} />
+              <ProjectCardMedia project={project} showVideo={!isDesktop} />
 
               <div className="relative z-10 flex items-start justify-between gap-3 p-4">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 text-[12px] font-bold text-white backdrop-blur-sm">
