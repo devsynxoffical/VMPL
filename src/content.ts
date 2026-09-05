@@ -512,12 +512,6 @@ export const featuredClients = [
     image: "/clients/client-jesse-rogers-casper-smc.webp",
   },
   {
-    name: "Tim Burd",
-    role: "9 figure Agency Owner",
-    meta: "101K Followers",
-    image: "/clients/client-tim-burd.webp",
-  },
-  {
     name: "Dr. Amy",
     role: "Cancer Researcher",
     meta: "259K Subscribers",
@@ -552,12 +546,6 @@ export const featuredClients = [
     role: "NPC Figure Competitor",
     meta: "94K Followers",
     image: "/clients/client-sarah-grace-fitness.webp",
-  },
-  {
-    name: "Mark Shay",
-    role: "Agency Owner & Coach",
-    meta: "29.8k Followers",
-    image: "/clients/client-mark-shay.webp",
   },
   {
     name: "Jared Van Yperen",
