@@ -28,10 +28,10 @@ function MemberAvatar({
 }) {
   const box =
     size === "lg"
-      ? "h-20 w-20 lg:h-24 lg:w-24 text-base"
+      ? "h-16 w-16 lg:h-[4.5rem] lg:w-[4.5rem] text-sm"
       : size === "sm"
-        ? "h-14 w-14 lg:h-16 lg:w-16 text-xs"
-        : "h-16 w-16 lg:h-[4.25rem] lg:w-[4.25rem] text-sm";
+        ? "h-12 w-12 lg:h-14 lg:w-14 text-[10px]"
+        : "h-14 w-14 lg:h-16 lg:w-16 text-xs";
 
   if (image) {
     return (
@@ -71,26 +71,30 @@ function TeamCard({
       data-team-card
       className={`team-org-card flex h-full w-full flex-col items-center text-center ${
         size === "lg"
-          ? "max-w-[17rem] rounded-[1.75rem] p-5 lg:p-6"
+          ? "max-w-[15rem] rounded-[1.5rem] p-4 lg:p-5"
           : size === "md"
-            ? "max-w-[14.5rem] rounded-[1.45rem] p-4 lg:p-5"
-            : "max-w-[12rem] rounded-[1.25rem] p-3.5 lg:max-w-[13rem] lg:p-4"
+            ? "max-w-[13rem] rounded-[1.35rem] p-3.5 lg:p-4"
+            : "max-w-[11.5rem] rounded-[1.2rem] p-3 lg:max-w-[12rem] lg:p-3.5"
       }`}
     >
       <MemberAvatar name={member.name} image={member.image} size={size} />
       <h3
-        className={`text-display mt-3 font-bold leading-tight tracking-tight ${
-          size === "lg" ? "text-lg lg:text-xl" : size === "md" ? "text-[0.95rem] lg:text-base" : "text-[0.85rem] lg:text-[0.95rem]"
+        className={`text-display mt-2.5 font-bold leading-tight tracking-tight ${
+          size === "lg"
+            ? "text-base lg:text-lg"
+            : size === "md"
+              ? "text-[0.9rem] lg:text-[0.95rem]"
+              : "text-[0.8rem] lg:text-[0.85rem]"
         }`}
       >
         {member.name}
       </h3>
-      <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-accent lg:text-[10px]">
+      <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.12em] text-accent">
         {member.role}
       </p>
       <p
-        className={`mt-2 leading-relaxed text-muted ${
-          size === "lg" ? "text-[13px] lg:text-sm" : "text-[11px] lg:text-[12px]"
+        className={`mt-1.5 leading-snug text-muted ${
+          size === "lg" ? "text-[12px]" : "text-[11px]"
         }`}
       >
         {member.bio}
@@ -202,8 +206,7 @@ export function Team() {
   }, [reducedMotion]);
 
   const sizeForLevel = (count: number): "sm" | "md" | "lg" => {
-    if (count <= 2) return "lg";
-    if (count <= 3) return "md";
+    if (count <= 2) return "md";
     return "sm";
   };
 
@@ -234,31 +237,34 @@ export function Team() {
           </p>
         </div>
 
-        <div ref={treeRef} className="team-org-tree mt-12 flex flex-col items-center lg:mt-16">
+        <div ref={treeRef} className="team-org-tree mt-12 flex flex-col items-center lg:mt-14">
           {team.levels.map((level, levelIndex) => {
             const size = sizeForLevel(level.length);
             const nextCount = team.levels[levelIndex + 1]?.length;
+            const cols =
+              level.length === 2
+                ? "grid-cols-2"
+                : level.length === 3
+                  ? "grid-cols-2 sm:grid-cols-3"
+                  : "grid-cols-2 sm:grid-cols-3";
 
             return (
               <div key={levelIndex} className="flex w-full flex-col items-center">
                 <div
                   data-team-level
-                  className="team-org-level flex w-full flex-wrap items-stretch justify-center gap-3 sm:gap-4 lg:gap-5"
-                  style={{ ["--level" as string]: levelIndex + 1 }}
+                  className={`team-org-level grid w-full justify-items-center gap-3 sm:gap-4 ${cols}`}
+                  style={{
+                    ["--level" as string]: levelIndex + 1,
+                    maxWidth:
+                      level.length <= 2
+                        ? "28rem"
+                        : level.length === 3
+                          ? "42rem"
+                          : "56rem",
+                  }}
                 >
                   {level.map((member) => (
-                    <div
-                      key={member.name}
-                      className={`flex justify-center ${
-                        level.length === 2
-                          ? "w-[calc(50%-0.5rem)] min-w-[10rem] sm:w-auto"
-                          : size === "lg"
-                            ? "w-full sm:w-auto"
-                            : size === "md"
-                              ? "w-[calc(50%-0.5rem)] min-w-[10rem] sm:w-auto"
-                              : "w-[calc(50%-0.5rem)] min-w-[9rem] sm:w-auto lg:w-auto"
-                      }`}
-                    >
+                    <div key={member.name} className="flex w-full justify-center">
                       <TeamCard member={member} size={size} />
                     </div>
                   ))}

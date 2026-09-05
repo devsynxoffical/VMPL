@@ -109,35 +109,51 @@ export const solutions = {
   items: [
     {
       title: "I Need More Leads",
-      description: "Find new opportunities and build a stronger pipeline.",
+      description:
+        "Verified contractor opportunities, scored and dial-ready — so your team stops chasing cold lists.",
+      outcomes: ["Verified leads", "Scored pipeline", "Outreach-ready"] as const,
       cta: "Explore Contractor Leads",
       href: brandHref("Contractor Leads"),
       brand: "Contractor Leads",
       logo: "/projects-logo/contractorleads.webp",
+      image: "/projects/contractorleads.webp",
+      bg: "/projects/bg/contractorleads.svg",
     },
     {
       title: "I Need More Conversions",
-      description: "Turn more attention into qualified leads and customers.",
+      description:
+        "Funnel, CRM, and follow-up systems that turn attention into booked calls and paying clients.",
+      outcomes: ["High-ticket funnels", "CRM + automation", "Booked calls"] as const,
       cta: "Explore Million Dollar Funnels",
       href: brandHref("Million Dollar Funnels"),
       brand: "Million Dollar Funnels",
       logo: "/projects-logo/milliondollarfunnel.webp",
+      image: "/projects/milliondollarfunnel.webp",
+      bg: "/projects/bg/milliondollarfunnel.svg",
     },
     {
       title: "I Want To Scale With Ads",
-      description: "Build predictable customer acquisition.",
+      description:
+        "Done-for-you Meta systems built to scale what already works — with creative and buying in sync.",
+      outcomes: ["Meta ads", "Creative testing", "Predictable ROAS"] as const,
       cta: "Explore Scale With Ads",
       href: brandHref("Scale With Ads"),
       brand: "Scale With Ads",
       logo: "/projects-logo/scalewithads.webp",
+      image: "/projects/scalewithads.webp",
+      bg: "/projects/bg/scalewithads.svg",
     },
     {
       title: "I Need Better Creative",
-      description: "Create attention that drives action.",
+      description:
+        "AI-powered video and creative production that stops the scroll and drives high-ticket action.",
+      outcomes: ["AI video", "Ad creatives", "Fast turnaround"] as const,
       cta: "Explore Million Dollar Media",
       href: brandHref("Million Dollar Media"),
       brand: "Million Dollar Media",
       logo: "/projects-logo/milliondollarmedia.webp",
+      image: "/projects/milliondollarmedia.webp",
+      bg: "/projects/bg/milliondollarmedia.svg",
     },
   ],
 } as const;
@@ -377,6 +393,46 @@ export const team = {
     ],
     [
       {
+        name: "Shourya Dahiya",
+        role: "Business Development Lead",
+        image: "/team/shourya-dahiya.png",
+        bio: "Building relationships and opening doors for new growth partnerships.",
+      },
+      {
+        name: "Daniel Brooks",
+        role: "Partnership Development",
+        image: "/team/daniel-brooks.png",
+        bio: "Connecting prospects to the right solution across the VMPL ecosystem.",
+      },
+      {
+        name: "Ethan Carter",
+        role: "Client Acquisition",
+        image: "/team/ethan-carter.png",
+        bio: "Driving outreach and conversations that turn interest into clients.",
+      },
+    ],
+    [
+      {
+        name: "Frank Miller",
+        role: "Growth Partnerships",
+        image: "/team/frank-miller.png",
+        bio: "Guiding new opportunities from first touch to signed partnership.",
+      },
+      {
+        name: "Jake Wilson",
+        role: "Business Development",
+        image: "/team/jake-wilson.png",
+        bio: "Expanding the pipeline with focused business development.",
+      },
+      {
+        name: "Ryan Cooper",
+        role: "Sales Development",
+        image: "/team/ryan-cooper.png",
+        bio: "Finding and qualifying the next high-fit clients for the team.",
+      },
+    ],
+    [
+      {
         name: "Taqi Jafar",
         role: "Creative Lead",
         image: "/team/taqi.jpeg",
@@ -387,44 +443,6 @@ export const team = {
         role: "Video Editor",
         image: "/team/ali.jpeg",
         bio: "Video that stops the scroll and drives action.",
-      },
-      {
-        name: "Shourya Dahiya",
-        role: "Media Buyer",
-        image: "/team/shourya-dahiya.png",
-        bio: "Paid campaigns with sharp testing and clean reporting.",
-      },
-      {
-        name: "Daniel Brooks",
-        role: "Funnel Strategist",
-        image: "/team/daniel-brooks.png",
-        bio: "Journeys that turn traffic into conversations.",
-      },
-    ],
-    [
-      {
-        name: "Ethan Carter",
-        role: "Copywriter",
-        image: "/team/ethan-carter.png",
-        bio: "Words that clarify the offer and move people to click.",
-      },
-      {
-        name: "Frank Miller",
-        role: "Account Manager",
-        image: "/team/frank-miller.png",
-        bio: "Keeping clients aligned and moving forward.",
-      },
-      {
-        name: "Jake Wilson",
-        role: "Motion Designer",
-        image: "/team/jake-wilson.png",
-        bio: "Motion that gives creative real presence.",
-      },
-      {
-        name: "Ryan Cooper",
-        role: "Growth Analyst",
-        image: "/team/ryan-cooper.png",
-        bio: "Data into the next experiment worth running.",
       },
     ],
   ],

@@ -61,8 +61,7 @@ function ProjectCardMedia({
               muted
               loop
               playsInline
-              autoPlay
-              preload="auto"
+              preload="metadata"
               controls={false}
               disablePictureInPicture
               disableRemotePlayback
@@ -84,6 +83,29 @@ function ProjectCardMedia({
   );
 }
 
+function playProjectVideo(video: HTMLVideoElement | null) {
+  if (!video) return;
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+  video.loop = true;
+  const run = () => {
+    video.play().catch(() => {});
+  };
+  if (video.readyState >= 2) run();
+  else video.addEventListener("canplay", run, { once: true });
+}
+
+function stopProjectVideo(video: HTMLVideoElement | null) {
+  if (!video) return;
+  video.pause();
+  try {
+    video.currentTime = 0;
+  } catch {
+    /* ignore seek before ready */
+  }
+}
+
 export function Projects() {
   const sectionRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
@@ -93,6 +115,7 @@ export function Projects() {
   const descRef = useRef<HTMLParagraphElement>(null);
   const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const mobileVideoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDesktop, setIsDesktop] = useState(true);
   const reducedMotion = useReducedMotion();
@@ -105,83 +128,25 @@ export function Projects() {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  // Keep project videos playing from mount — no scroll-gated pause
+  // Ensure videos start paused on the first frame (poster / frame 0)
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+    const videos = [
+      ...videoRefs.current,
+      ...mobileVideoRefs.current,
+    ].filter(Boolean) as HTMLVideoElement[];
 
-    const getVideos = () =>
-      Array.from(
-        section.querySelectorAll<HTMLVideoElement>("video[data-project-video]"),
-      );
-
-    const forcePlay = (video: HTMLVideoElement) => {
-      video.muted = true;
-      video.defaultMuted = true;
-      video.setAttribute("muted", "");
-      video.playsInline = true;
-      video.loop = true;
-      if (video.preload !== "auto") video.preload = "auto";
-
-      const run = () => {
-        const play = video.play();
-        if (play && typeof play.catch === "function") {
-          play.catch(() => {
-            window.setTimeout(() => {
-              video.play().catch(() => {});
-            }, 200);
-          });
+    videos.forEach((video) => {
+      video.pause();
+      const snap = () => {
+        try {
+          video.currentTime = 0;
+        } catch {
+          /* ignore */
         }
       };
-
-      if (video.readyState >= 2) run();
-      else {
-        video.addEventListener("loadeddata", run, { once: true });
-        video.addEventListener("canplay", run, { once: true });
-      }
-    };
-
-    const playAll = () => {
-      getVideos().forEach(forcePlay);
-    };
-
-    playAll();
-
-    const onStall = (e: Event) => {
-      forcePlay(e.currentTarget as HTMLVideoElement);
-    };
-
-    const bind = () => {
-      getVideos().forEach((video) => {
-        video.addEventListener("stalled", onStall);
-        video.addEventListener("error", onStall);
-      });
-    };
-    bind();
-
-    const watchdog = window.setInterval(playAll, 500);
-    const onVisible = () => {
-      if (!document.hidden) playAll();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    window.addEventListener("focus", playAll);
-
-    const t1 = window.setTimeout(playAll, 100);
-    const t2 = window.setTimeout(playAll, 500);
-    const t3 = window.setTimeout(playAll, 1500);
-
-    return () => {
-      window.clearInterval(watchdog);
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      window.clearTimeout(t3);
-      document.removeEventListener("visibilitychange", onVisible);
-      window.removeEventListener("focus", playAll);
-      getVideos().forEach((video) => {
-        video.removeEventListener("stalled", onStall);
-        video.removeEventListener("error", onStall);
-      });
-    };
+      if (video.readyState >= 1) snap();
+      else video.addEventListener("loadedmetadata", snap, { once: true });
+    });
   }, [isDesktop]);
 
   useEffect(() => {
@@ -403,6 +368,10 @@ export function Projects() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="project-card focus-ring group relative isolate flex h-[min(58vh,560px)] w-[clamp(320px,46vw,560px)] shrink-0 flex-col overflow-hidden rounded-[1.75rem] bg-[#161616] lg:h-[min(60vh,600px)] lg:w-[clamp(360px,44vw,580px)] lg:rounded-[2rem]"
+                onMouseEnter={() => playProjectVideo(videoRefs.current[index])}
+                onMouseLeave={() => stopProjectVideo(videoRefs.current[index])}
+                onFocus={() => playProjectVideo(videoRefs.current[index])}
+                onBlur={() => stopProjectVideo(videoRefs.current[index])}
               >
                 <ProjectCardMedia
                   project={project}
@@ -458,7 +427,7 @@ export function Projects() {
 
         {/* Mobile: vertical stack — same card language */}
         <div className="mt-10 flex flex-col gap-5 px-4 md:hidden lg:px-[2vw]">
-          {projectsSection.projects.map((project) => (
+          {projectsSection.projects.map((project, index) => (
             <a
               key={`m-${project.name}`}
               data-mobile-project
@@ -466,8 +435,23 @@ export function Projects() {
               target="_blank"
               rel="noopener noreferrer"
               className="project-card focus-ring group relative isolate flex min-h-[72vh] w-full flex-col overflow-hidden rounded-[1.75rem] bg-[#111]"
+              onTouchStart={() =>
+                playProjectVideo(mobileVideoRefs.current[index])
+              }
+              onTouchEnd={() =>
+                stopProjectVideo(mobileVideoRefs.current[index])
+              }
+              onTouchCancel={() =>
+                stopProjectVideo(mobileVideoRefs.current[index])
+              }
             >
-              <ProjectCardMedia project={project} showVideo={!isDesktop} />
+              <ProjectCardMedia
+                project={project}
+                showVideo={!isDesktop}
+                videoRef={(el) => {
+                  mobileVideoRefs.current[index] = el;
+                }}
+              />
 
               <div className="relative z-10 flex items-start justify-between gap-3 p-4">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 text-[12px] font-bold text-white backdrop-blur-sm">
