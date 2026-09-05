@@ -85,22 +85,36 @@ export function Projects() {
   const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const activeIndexRef = useRef(0);
   const reducedMotion = useReducedMotion();
 
   const sectionInViewRef = useRef(false);
 
   useEffect(() => {
+    activeIndexRef.current = activeIndex;
+  }, [activeIndex]);
+
+  useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
+
+    /** True only if no ancestor is display:none / visibility:hidden */
+    const isEffectivelyVisible = (el: HTMLElement) => {
+      let node: HTMLElement | null = el;
+      while (node && node !== section) {
+        const style = window.getComputedStyle(node);
+        if (style.display === "none" || style.visibility === "hidden") {
+          return false;
+        }
+        node = node.parentElement;
+      }
+      return true;
+    };
 
     const getVideos = () =>
       Array.from(
         section.querySelectorAll<HTMLVideoElement>("video[data-project-video]"),
-      ).filter((video) => {
-        const style = window.getComputedStyle(video);
-        // Skip the hidden breakpoint set (desktop vs mobile duplicate)
-        return style.display !== "none" && style.visibility !== "hidden";
-      });
+      ).filter(isEffectivelyVisible);
 
     const forcePlay = (video: HTMLVideoElement) => {
       video.muted = true;
@@ -114,7 +128,6 @@ export function Projects() {
         const play = video.play();
         if (play && typeof play.catch === "function") {
           play.catch(() => {
-            // Recover from intermittent autoplay / decode stalls
             window.setTimeout(() => {
               if (!sectionInViewRef.current) return;
               video.play().catch(() => {});
@@ -132,14 +145,50 @@ export function Projects() {
       }
     };
 
-    const playAll = () => {
-      getVideos().forEach(forcePlay);
+    /**
+     * Only decode the active card ±1. Playing every desktop+mobile clone
+     * (or all 4 HD clips at once) makes Chrome pause everything mid-scrub.
+     */
+    const syncPlayback = () => {
+      if (!sectionInViewRef.current) {
+        getVideos().forEach((video) => video.pause());
+        return;
+      }
+
+      const desktop = window.matchMedia("(min-width: 768px)").matches;
+      const active = activeIndexRef.current;
+
+      getVideos().forEach((video) => {
+        const card = video.closest("a");
+        if (!card) return;
+
+        if (!desktop) {
+          // Mobile stack: play when the card is near the viewport
+          const rect = card.getBoundingClientRect();
+          const near =
+            rect.bottom > 0 &&
+            rect.top < window.innerHeight &&
+            rect.top < window.innerHeight * 0.92;
+          if (near) forcePlay(video);
+          else video.pause();
+          return;
+        }
+
+        const cards = cardRefs.current.filter(Boolean) as HTMLAnchorElement[];
+        const index = cards.indexOf(card as HTMLAnchorElement);
+        if (index < 0) {
+          video.pause();
+          return;
+        }
+        if (Math.abs(index - active) <= 1) forcePlay(video);
+        else video.pause();
+      });
     };
 
     const pauseAll = () => {
-      getVideos().forEach((video) => {
-        video.pause();
-      });
+      section
+        .querySelectorAll<HTMLVideoElement>("video[data-project-video]")
+        .forEach((video) => video.pause());
     };
 
     const onStall = (e: Event) => {
@@ -151,10 +200,12 @@ export function Projects() {
     registerGsap();
 
     const bindStallHandlers = () => {
-      getVideos().forEach((video) => {
-        video.addEventListener("stalled", onStall);
-        video.addEventListener("error", onStall);
-      });
+      section
+        .querySelectorAll<HTMLVideoElement>("video[data-project-video]")
+        .forEach((video) => {
+          video.addEventListener("stalled", onStall);
+          video.addEventListener("error", onStall);
+        });
     };
 
     const unbindStallHandlers = () => {
@@ -168,44 +219,91 @@ export function Projects() {
 
     bindStallHandlers();
 
+    // Stay active whenever the projects block intersects the viewport
     const st = ScrollTrigger.create({
       trigger: section,
-      start: "top 85%",
+      start: "top bottom",
       end: "bottom top",
       onToggle: (self) => {
         sectionInViewRef.current = self.isActive;
-        if (self.isActive) playAll();
+        if (self.isActive) syncPlayback();
         else pauseAll();
       },
       onRefresh: (self) => {
         sectionInViewRef.current = self.isActive;
-        if (self.isActive) playAll();
+        if (self.isActive) syncPlayback();
       },
     });
 
     sectionInViewRef.current = st.isActive;
-    if (st.isActive) playAll();
+    if (st.isActive) syncPlayback();
 
-    // Keep every card alive while pinned — recover any that drop out
     const watchdog = window.setInterval(() => {
       if (!sectionInViewRef.current) return;
-      getVideos().forEach((video) => {
-        if (video.paused || video.ended) forcePlay(video);
-      });
-    }, 900);
+      syncPlayback();
+    }, 700);
 
-    const t1 = window.setTimeout(playAll, 200);
-    const t2 = window.setTimeout(playAll, 800);
+    const t1 = window.setTimeout(syncPlayback, 200);
+    const t2 = window.setTimeout(syncPlayback, 800);
+
+    const onMq = () => syncPlayback();
+    const mq = window.matchMedia("(min-width: 768px)");
+    mq.addEventListener("change", onMq);
 
     return () => {
       window.clearInterval(watchdog);
       window.clearTimeout(t1);
       window.clearTimeout(t2);
+      mq.removeEventListener("change", onMq);
       unbindStallHandlers();
       st.kill();
       pauseAll();
     };
   }, []);
+
+  // Re-sync when the centered card changes during horizontal scrub
+  useEffect(() => {
+    if (!sectionInViewRef.current) return;
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const desktop = window.matchMedia("(min-width: 768px)").matches;
+    if (!desktop) return;
+
+    const isEffectivelyVisible = (el: HTMLElement) => {
+      let node: HTMLElement | null = el;
+      while (node && node !== section) {
+        const style = window.getComputedStyle(node);
+        if (style.display === "none" || style.visibility === "hidden") {
+          return false;
+        }
+        node = node.parentElement;
+      }
+      return true;
+    };
+
+    const videos = Array.from(
+      section.querySelectorAll<HTMLVideoElement>("video[data-project-video]"),
+    ).filter(isEffectivelyVisible);
+
+    videos.forEach((video) => {
+      const card = video.closest("a");
+      const cards = cardRefs.current.filter(Boolean) as HTMLAnchorElement[];
+      const index = card ? cards.indexOf(card as HTMLAnchorElement) : -1;
+      if (index < 0) {
+        video.pause();
+        return;
+      }
+      if (Math.abs(index - activeIndex) <= 1) {
+        video.muted = true;
+        video.playsInline = true;
+        video.loop = true;
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    });
+  }, [activeIndex]);
 
   useEffect(() => {
     registerGsap();
