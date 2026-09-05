@@ -312,26 +312,31 @@ export const capabilities = {
   chips: [
     {
       id: "systems",
+      label: "Systems",
       title: "Connected Growth Systems",
       copy: "An ecosystem of brands that plug into each other, so every lead, funnel, and creative piece compounds.",
     },
     {
       id: "strategy",
+      label: "Strategy",
       title: "Clear Growth Strategy",
       copy: "Clear paths from attention to revenue. No disconnected vendors. One growth picture.",
     },
     {
       id: "creative",
+      label: "Creative",
       title: "Creative That Converts",
       copy: "Attention-getting creative built to drive action, not just look good in a deck.",
     },
     {
       id: "media",
+      label: "Media",
       title: "Paid Media & Acquisition",
       copy: "Meta ads and acquisition systems designed for predictable pipeline, not one-off spikes.",
     },
     {
       id: "scale",
+      label: "Scale",
       title: "Built To Scale",
       copy: "Ads, creative, and conversion built to grow with you, not restart every quarter.",
     },
@@ -341,29 +346,49 @@ export const capabilities = {
 export const testimonials = {
   label: "Testimonials",
   heading: "From People We've Worked With",
+  description:
+    "Real conversations from clients — tap any clip for sound.",
   items: [
     {
       id: "portrait-1",
       src: "/testimonials/portrait-1.mp4",
-      orientation: "portrait" as const,
+      width: 720,
+      height: 1280,
       label: "Client story",
     },
     {
       id: "landscape-1",
       src: "/testimonials/landscape-1.mp4",
-      orientation: "landscape" as const,
-      label: "Client story",
-    },
-    {
-      id: "square-1",
-      src: "/testimonials/square-1.mp4",
-      orientation: "square" as const,
+      width: 1280,
+      height: 720,
       label: "Client story",
     },
     {
       id: "portrait-2",
       src: "/testimonials/portrait-2.mp4",
-      orientation: "portrait" as const,
+      width: 720,
+      height: 1280,
+      label: "Client story",
+    },
+    {
+      id: "landscape-2",
+      src: "/testimonials/landscape-2.mp4",
+      width: 1280,
+      height: 720,
+      label: "Client story",
+    },
+    {
+      id: "square-1",
+      src: "/testimonials/square-1.mp4",
+      width: 720,
+      height: 720,
+      label: "Client story",
+    },
+    {
+      id: "landscape-3",
+      src: "/testimonials/landscape-3.mp4",
+      width: 1280,
+      height: 720,
       label: "Client story",
     },
   ],

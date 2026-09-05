@@ -142,6 +142,7 @@ function CapabilityChip({
         }}
       >
         <ChipGlyph id={chip.id} />
+        <span className="capa-chip-label">{chip.label}</span>
         <span className="capa-chip-chevron" aria-hidden>
           <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" fill="none">
             <path
@@ -236,17 +237,18 @@ export function CapabilitiesReveal() {
         );
       }
 
-      // Scroll-scrubbed "writing" reveal: words light up as you scroll
-      gsap.set(units, { opacity: 0.18 });
+      // One-shot word reveal — don't leave half the sentence faded mid-scroll
+      gsap.set(units, { opacity: 0.22, y: 10 });
       gsap.to(units, {
         opacity: 1,
-        ease: "none",
-        stagger: 0.12,
+        y: 0,
+        duration: 0.55,
+        stagger: 0.035,
+        ease: "power2.out",
         scrollTrigger: {
           trigger: lead,
-          start: "top 78%",
-          end: "bottom 32%",
-          scrub: 0.75,
+          start: "top 80%",
+          toggleActions: "play none none none",
         },
       });
     }, section);
@@ -290,7 +292,7 @@ export function CapabilitiesReveal() {
 
         <p
           ref={leadRef}
-          className="capa-lead text-display mt-8 max-w-[28ch] text-center text-[clamp(1.55rem,3.6vw,3.15rem)] font-extrabold leading-[1.18] tracking-[-0.03em] text-foreground sm:max-w-[34ch] lg:mt-10 lg:max-w-[30ch]"
+          className="capa-lead text-display mt-8 max-w-[36ch] text-center text-[clamp(1.45rem,3.2vw,2.85rem)] font-extrabold leading-[1.28] tracking-[-0.03em] text-foreground sm:max-w-[42ch] lg:mt-10 lg:max-w-[40ch]"
         >
           {capabilities.lead.map((part, i) => {
             if (part.type === "text") {
