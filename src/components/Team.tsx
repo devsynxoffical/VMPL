@@ -28,10 +28,10 @@ function MemberAvatar({
 }) {
   const box =
     size === "lg"
-      ? "h-16 w-16 lg:h-[4.5rem] lg:w-[4.5rem] text-sm"
+      ? "h-[5.25rem] w-[5.25rem] lg:h-24 lg:w-24 text-base"
       : size === "sm"
-        ? "h-12 w-12 lg:h-14 lg:w-14 text-[10px]"
-        : "h-14 w-14 lg:h-16 lg:w-16 text-xs";
+        ? "h-[3.75rem] w-[3.75rem] lg:h-[4.25rem] lg:w-[4.25rem] text-xs"
+        : "h-[4.5rem] w-[4.5rem] lg:h-20 lg:w-20 text-sm";
 
   if (image) {
     return (
@@ -43,7 +43,7 @@ function MemberAvatar({
           alt={name}
           fill
           className="object-cover object-top"
-          sizes={size === "lg" ? "96px" : "72px"}
+          sizes={size === "lg" ? "96px" : "80px"}
         />
       </div>
     );
@@ -71,30 +71,30 @@ function TeamCard({
       data-team-card
       className={`team-org-card flex h-full w-full flex-col items-center text-center ${
         size === "lg"
-          ? "max-w-[15rem] rounded-[1.5rem] p-4 lg:p-5"
+          ? "max-w-[17rem] rounded-[1.75rem] p-5 lg:p-6"
           : size === "md"
-            ? "max-w-[13rem] rounded-[1.35rem] p-3.5 lg:p-4"
-            : "max-w-[11.5rem] rounded-[1.2rem] p-3 lg:max-w-[12rem] lg:p-3.5"
+            ? "max-w-[15rem] rounded-[1.55rem] p-4 lg:p-5"
+            : "max-w-[13.5rem] rounded-[1.35rem] p-4 lg:max-w-[14rem] lg:p-[1.15rem]"
       }`}
     >
       <MemberAvatar name={member.name} image={member.image} size={size} />
       <h3
-        className={`text-display mt-2.5 font-bold leading-tight tracking-tight ${
+        className={`text-display mt-3.5 font-bold leading-tight tracking-tight ${
           size === "lg"
-            ? "text-base lg:text-lg"
+            ? "text-lg lg:text-xl"
             : size === "md"
-              ? "text-[0.9rem] lg:text-[0.95rem]"
-              : "text-[0.8rem] lg:text-[0.85rem]"
+              ? "text-[1rem] lg:text-[1.05rem]"
+              : "text-[0.92rem] lg:text-[0.98rem]"
         }`}
       >
         {member.name}
       </h3>
-      <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.12em] text-accent">
+      <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-accent">
         {member.role}
       </p>
       <p
-        className={`mt-1.5 leading-snug text-muted ${
-          size === "lg" ? "text-[12px]" : "text-[11px]"
+        className={`mt-2.5 leading-relaxed text-muted ${
+          size === "lg" ? "text-[13px] lg:text-sm" : "text-[12px] lg:text-[13px]"
         }`}
       >
         {member.bio}
@@ -206,7 +206,8 @@ export function Team() {
   }, [reducedMotion]);
 
   const sizeForLevel = (count: number): "sm" | "md" | "lg" => {
-    if (count <= 2) return "md";
+    if (count <= 2) return "lg";
+    if (count <= 3) return "md";
     return "sm";
   };
 
@@ -237,7 +238,7 @@ export function Team() {
           </p>
         </div>
 
-        <div ref={treeRef} className="team-org-tree mt-12 flex flex-col items-center lg:mt-14">
+        <div ref={treeRef} className="team-org-tree mt-12 flex flex-col items-center lg:mt-16">
           {team.levels.map((level, levelIndex) => {
             const size = sizeForLevel(level.length);
             const nextCount = team.levels[levelIndex + 1]?.length;
@@ -252,15 +253,15 @@ export function Team() {
               <div key={levelIndex} className="flex w-full flex-col items-center">
                 <div
                   data-team-level
-                  className={`team-org-level grid w-full justify-items-center gap-3 sm:gap-4 ${cols}`}
+                  className={`team-org-level grid w-full justify-items-center gap-4 sm:gap-5 lg:gap-6 ${cols}`}
                   style={{
                     ["--level" as string]: levelIndex + 1,
                     maxWidth:
                       level.length <= 2
-                        ? "28rem"
+                        ? "36rem"
                         : level.length === 3
-                          ? "42rem"
-                          : "56rem",
+                          ? "52rem"
+                          : "60rem",
                   }}
                 >
                   {level.map((member) => (
