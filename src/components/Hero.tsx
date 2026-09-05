@@ -353,11 +353,12 @@ export function Hero() {
         >
           <div className="relative h-full w-full">
             <Image
-              src="/vaishali-kapoor.png"
+              src="/vaishali-kapoor.webp"
               alt=""
               fill
               className="object-contain object-[center_top] blur-2xl"
               sizes="780px"
+              unoptimized
             />
           </div>
         </div>
@@ -444,12 +445,13 @@ export function Hero() {
         >
           <div className="relative h-full w-full">
             <Image
-              src="/vaishali-kapoor.png"
+              src="/vaishali-kapoor.webp"
               alt="Vaishali Media Productions"
               fill
               priority
               className="object-contain object-[center_top]"
               sizes="(max-width: 768px) 95vw, 780px"
+              unoptimized
             />
             <div className="absolute inset-x-0 bottom-0 h-[12%] bg-gradient-to-t from-background via-background/40 to-transparent" />
           </div>

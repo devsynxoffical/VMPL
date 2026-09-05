@@ -277,6 +277,8 @@ export function StatementSection() {
                 fill
                 className="object-cover object-top"
                 sizes="72px"
+                unoptimized
+                loading="lazy"
               />
             </div>
             <div className="min-w-0">

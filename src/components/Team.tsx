@@ -44,6 +44,10 @@ function MemberAvatar({
           fill
           className="object-cover object-top"
           sizes={size === "lg" ? "96px" : "80px"}
+          quality={75}
+          unoptimized
+          loading="lazy"
+          decoding="async"
         />
       </div>
     );
