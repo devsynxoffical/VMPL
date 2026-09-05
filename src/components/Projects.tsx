@@ -45,18 +45,18 @@ function ProjectCardMedia({
           alt=""
           className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/15 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/25 to-black/85" />
       </div>
 
-      {/* Centered device screen — video plays here (fit, no side crop) */}
-      <div className="project-screen pointer-events-none absolute inset-x-[7%] top-[16%] bottom-[22%] z-[5] flex items-center justify-center">
-        <div className="relative h-full w-full overflow-hidden rounded-[1.15rem] border border-white/30 bg-[#0b0b0b] shadow-[0_24px_60px_rgba(0,0,0,0.55)] ring-1 ring-black/40 transition-transform duration-700 ease-out group-hover:scale-[1.02] lg:rounded-[1.35rem]">
+      {/* Device screen fills the mid card; copy overlays the bottom */}
+      <div className="project-screen pointer-events-none absolute inset-x-[5%] top-[13%] bottom-[20%] z-[5]">
+        <div className="relative h-full w-full overflow-hidden rounded-[1.1rem] border border-white/30 bg-[#0b0b0b] shadow-[0_24px_60px_rgba(0,0,0,0.55)] ring-1 ring-black/40 transition-transform duration-700 ease-out group-hover:scale-[1.02] lg:rounded-[1.25rem]">
           <video
             ref={videoRef}
             data-project-video
             src={project.video}
             poster={project.image}
-            className="absolute inset-0 h-full w-full object-contain object-center"
+            className="absolute inset-0 h-full w-full object-cover object-top"
             muted
             loop
             playsInline
@@ -382,13 +382,13 @@ export function Projects() {
       <div
         ref={pinRef}
         id="projects"
-        className="flex flex-col justify-start gap-8 py-10 md:min-h-[100svh] md:gap-12 md:py-12 lg:gap-14 lg:py-14"
+        className="flex flex-col justify-start gap-6 py-8 md:min-h-[100svh] md:gap-8 md:py-10 lg:gap-9 lg:py-11"
       >
         <div className="w-full shrink-0 px-4 lg:px-[2vw]">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-8 xl:gap-10">
             <h2
               ref={headingRef}
-              className="text-display max-w-[16ch] text-[clamp(2rem,4.4vw,3.6rem)] font-extrabold leading-[0.98] tracking-[-0.04em] text-white"
+              className="text-display max-w-[18ch] text-[clamp(2rem,4.4vw,3.6rem)] font-extrabold leading-[0.98] tracking-[-0.04em] text-white"
             >
               {projectsSection.headingLines.map((line) => (
                 <span key={line} className="block overflow-hidden">
@@ -400,7 +400,7 @@ export function Projects() {
             </h2>
             <p
               ref={descRef}
-              className="max-w-[36ch] text-[14px] leading-relaxed text-white/55 lg:mb-1 lg:text-[15px] lg:text-right"
+              className="max-w-[44ch] text-[14px] leading-relaxed text-white/55 lg:mb-0.5 lg:max-w-[38ch] lg:text-[15px] lg:text-right"
             >
               {projectsSection.description}
             </p>
@@ -410,7 +410,7 @@ export function Projects() {
         {/* Desktop: pinned horizontal scrub — wide enough that ~2 cards fill the view */}
         <div
           ref={viewportRef}
-          className="relative mt-2 hidden w-full overflow-hidden md:mt-4 md:block"
+          className="relative mt-1 hidden w-full overflow-hidden md:block"
         >
           <div
             ref={trackRef}
@@ -434,11 +434,11 @@ export function Projects() {
                   }}
                 />
 
-                <div className="relative z-10 flex items-start justify-between gap-3 p-4 lg:p-5">
+                <div className="relative z-10 flex items-start justify-between gap-3 px-4 pt-4 lg:px-5 lg:pt-5">
                   <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 text-[12px] font-bold tracking-wide text-white backdrop-blur-sm lg:h-11 lg:w-11 lg:text-[13px]">
                     {project.index}
                   </span>
-                  <div className="flex max-w-[70%] flex-wrap justify-end gap-1.5">
+                  <div className="flex max-w-[75%] flex-wrap justify-end gap-1.5">
                     {project.tags.map((tag) => (
                       <span
                         key={tag}
@@ -450,26 +450,28 @@ export function Projects() {
                   </div>
                 </div>
 
-                <div className="relative z-10 mt-auto flex items-end justify-between gap-4 p-5 lg:p-6">
-                  <div className="min-w-0 max-w-[78%]">
-                    <h3 className="text-display text-[clamp(1.4rem,2.2vw,1.95rem)] font-extrabold leading-tight tracking-tight text-white">
-                      {project.name}
-                    </h3>
-                    <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-white/70 lg:text-[13px]">
-                      {project.description}
-                    </p>
+                {/* Copy sits on a bottom scrim — no empty purple band */}
+                <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black via-black/80 to-transparent px-4 pb-4 pt-14 lg:px-5 lg:pb-5 lg:pt-16">
+                  <div className="flex items-end gap-3 lg:gap-4">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-display text-[clamp(1.35rem,2.1vw,1.85rem)] font-extrabold leading-tight tracking-tight text-white">
+                        {project.name}
+                      </h3>
+                      <p className="mt-1 text-[12px] leading-snug text-white/75 lg:text-[13px] lg:leading-relaxed">
+                        {project.description}
+                      </p>
+                    </div>
+                    <span
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-300 lg:h-12 lg:w-12 ${
+                        activeIndex === index
+                          ? "bg-accent text-white"
+                          : "bg-white/15 text-white group-hover:bg-accent"
+                      }`}
+                      aria-hidden
+                    >
+                      <ArrowIcon />
+                    </span>
                   </div>
-
-                  <span
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors duration-300 lg:h-14 lg:w-14 ${
-                      activeIndex === index
-                        ? "bg-accent text-white"
-                        : "bg-white/15 text-white group-hover:bg-accent"
-                    }`}
-                    aria-hidden
-                  >
-                    <ArrowIcon />
-                  </span>
                 </div>
               </a>
             ))}
@@ -505,16 +507,16 @@ export function Projects() {
                 </div>
               </div>
 
-              <div className="relative z-10 mt-auto flex items-end justify-between gap-4 p-5">
-                <div className="min-w-0 max-w-[75%]">
+              <div className="relative z-10 mt-auto flex items-end gap-3 p-4 pt-2">
+                <div className="min-w-0 flex-1">
                   <h3 className="text-display text-[1.55rem] font-extrabold leading-tight text-white">
                     {project.name}
                   </h3>
-                  <p className="mt-2 text-[13px] leading-relaxed text-white/70">
+                  <p className="mt-1 text-[13px] leading-snug text-white/70">
                     {project.description}
                   </p>
                 </div>
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent text-white">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-white">
                   <ArrowIcon />
                 </span>
               </div>

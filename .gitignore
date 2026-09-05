@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Huge source video masters (web encodes live in public/)
+/_raw-videos/
+

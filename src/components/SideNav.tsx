@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { navItems, navSectionIds, site, hero, projectLogos } from "@/content";
+import Image from "next/image";
+import { navItems, navSectionIds, site, hero, sidebarClientLogos } from "@/content";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { useHeroScroll } from "@/context/HeroScrollContext";
 import { BrandLogo } from "@/components/BrandLogo";
-import { BrandMark } from "@/components/BrandMark";
 import { FacebookIcon, LinkedInIcon } from "@/components/SocialIcons";
 
 function NavIcon({ name }: { name: string }) {
@@ -225,7 +225,7 @@ export function SideNav() {
         }}
       >
         <div
-          className="grid grid-cols-2 divide-x divide-foreground/10 rounded-[22px] bg-white/70 px-3 py-3"
+          className="glass-hero grid grid-cols-2 divide-x divide-foreground/10 rounded-[22px] px-3 py-3"
           data-dock="stats"
         >
           <div className="pr-3">
@@ -279,19 +279,22 @@ export function SideNav() {
           </div>
         </nav>
 
-        <div className="overflow-hidden rounded-[18px] bg-white/70 px-2 py-2">
+        <div className="overflow-hidden rounded-[18px] bg-white/70 px-1 py-1.5">
           <div className="marquee-track items-center">
-            {[...projectLogos, ...projectLogos].map((logo, i) => (
-              <a
-                key={`${logo.src}-${i}`}
-                href={logo.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="focus-ring mx-2 shrink-0 transition-opacity hover:opacity-80"
-                aria-label={logo.alt}
+            {[...sidebarClientLogos, ...sidebarClientLogos].map((src, i) => (
+              <div
+                key={`${src}-${i}`}
+                className="relative -mx-0.5 h-16 w-[4.25rem] shrink-0 sm:h-[4.25rem] sm:w-[4.75rem]"
+                aria-hidden={i >= sidebarClientLogos.length}
               >
-                <BrandMark src={logo.src} alt={logo.alt} size="sm" />
-              </a>
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  className="scale-110 object-contain object-center"
+                  sizes="76px"
+                />
+              </div>
             ))}
           </div>
         </div>

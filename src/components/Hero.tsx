@@ -24,8 +24,10 @@ export function Hero() {
   const secondaryCtaRef = useRef<HTMLButtonElement>(null);
   const bottomLeftRef = useRef<HTMLParagraphElement>(null);
   const bottomRightRef = useRef<HTMLParagraphElement>(null);
-  const { setProgress } = useHeroScroll();
+  const { setProgress, progress } = useHeroScroll();
   const reducedMotion = useReducedMotion();
+  // Fixed hero chrome must not leak onto later sections (Team, etc.)
+  const showHeroOverlay = progress < 0.2;
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -48,10 +50,11 @@ export function Hero() {
 
     const runIntro = (isDesktop: boolean) => {
       const wordmark = bgTextRef.current;
-      const uiEls = [
-        ...(isDesktop
-          ? [navRef.current, statsRef.current, traitsRef.current]
-          : []),
+      const glassEls = (
+        isDesktop ? [statsRef.current, traitsRef.current] : []
+      ).filter(Boolean);
+      const motionEls = [
+        ...(isDesktop ? [navRef.current] : []),
         headlineRef.current,
         primaryCtaRef.current,
         secondaryCtaRef.current,
@@ -68,7 +71,9 @@ export function Hero() {
         filter: "blur(0px)",
       });
       gsap.set(portraitBlurRef.current, { opacity: 0 });
-      gsap.set(uiEls, { opacity: 0, y: 28, visibility: "hidden" });
+      // Glass cards: opacity only — transforms kill backdrop-filter
+      gsap.set(glassEls, { opacity: 0, visibility: "hidden", clearProps: "transform" });
+      gsap.set(motionEls, { opacity: 0, y: 28, visibility: "hidden" });
       gsap.set(wordmark, {
         opacity: 0,
         scale: 1.04,
@@ -92,9 +97,9 @@ export function Hero() {
         0.15,
       );
 
-      // 2) Portrait + all other text/UI together — after the heading
-      const heroContent = [portraitRef.current, ...uiEls].filter(Boolean);
-      intro.set(heroContent, { visibility: "visible" }, "+=0.4");
+      // 2) Portrait + UI — glass cards fade only so frosted blur keeps working
+      const heroContent = [portraitRef.current, ...motionEls].filter(Boolean);
+      intro.set([...heroContent, ...glassEls], { visibility: "visible" }, "+=0.4");
       intro.to(
         heroContent,
         {
@@ -103,6 +108,19 @@ export function Hero() {
           duration: 1,
           stagger: 0.05,
           ease: "power2.out",
+        },
+        "<",
+      );
+      intro.to(
+        glassEls,
+        {
+          opacity: 1,
+          duration: 1,
+          stagger: 0.05,
+          ease: "power2.out",
+          onComplete: () => {
+            gsap.set(glassEls, { clearProps: "transform" });
+          },
         },
         "<",
       );
@@ -214,7 +232,7 @@ export function Hero() {
       );
       tl.to(
         [statsRef.current, traitsRef.current],
-        { y: -100, opacity: 0, duration: 0.3, ease: "power2.in" },
+        { opacity: 0, duration: 0.3, ease: "power2.in" },
         0.05,
       );
       tl.to(
@@ -311,19 +329,21 @@ export function Hero() {
       <div
         ref={pinRef}
         id="hero"
-        className="relative flex h-screen w-full flex-col overflow-x-clip overflow-y-visible bg-background"
+        className="relative flex h-screen w-full flex-col overflow-visible bg-background"
       >
-        {/* VAISHALI — appears first in place; portrait + chrome follow */}
-        <div
-          ref={bgTextRef}
-          className="text-display brand-gradient-text pointer-events-none absolute inset-x-0 top-[2%] z-[1] select-none px-[0.5%] text-center text-[clamp(4.5rem,20vw,20rem)] font-extrabold leading-none tracking-[-0.04em] will-change-transform"
-          style={{ opacity: 0 }}
-          aria-hidden
-        >
-          {hero.bgText}
-          <sup className="ml-1 inline-block align-super text-[0.12em] font-bold leading-none">
-            ®
-          </sup>
+        {/* VAISHALI — clip wrapper so overflow doesn't kill card backdrop-filter */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[42%] overflow-hidden">
+          <div
+            ref={bgTextRef}
+            className="text-display brand-gradient-text absolute inset-x-0 top-[5%] select-none px-[0.5%] text-center text-[clamp(4.5rem,20vw,20rem)] font-extrabold leading-none tracking-[-0.04em] will-change-transform"
+            style={{ opacity: 0 }}
+            aria-hidden
+          >
+            {hero.bgText}
+            <sup className="ml-1 inline-block align-super text-[0.12em] font-bold leading-none">
+              ®
+            </sup>
+          </div>
         </div>
 
         <div
@@ -416,55 +436,6 @@ export function Hero() {
           </div>
         </nav>
 
-        {/* Left overlay cards — frosted glass */}
-        <div
-          ref={statsRef}
-          className="absolute left-[12%] top-[58%] z-[35] hidden flex-col gap-3.5 will-change-transform lg:flex xl:left-[14%]"
-        >
-          <div className="glass-hero flex items-center gap-3 rounded-[22px] px-4 py-3.5">
-            <BrandLogo variant="mark" className="h-9 w-9 shrink-0" />
-            <div className="leading-tight">
-              <div className="text-display text-xl font-extrabold tracking-tight text-accent">
-                {hero.stats[0].value}
-                {hero.stats[0].suffix}
-              </div>
-              <div className="text-[12px] font-bold text-foreground/90">
-                {hero.stats[0].label}
-              </div>
-            </div>
-          </div>
-          <div className="glass-hero ml-5 rounded-[22px] px-5 py-4">
-            <div className="text-display text-[2.65rem] font-extrabold leading-none tracking-tight text-accent">
-              {hero.stats[1].value}
-              {hero.stats[1].suffix}
-            </div>
-            <div className="mt-1 text-[12px] font-bold leading-snug text-foreground/90">
-              Years of
-              <br />
-              experience
-            </div>
-          </div>
-        </div>
-
-        <div
-          ref={traitsRef}
-          className="absolute right-[12%] top-[58%] z-[35] hidden will-change-transform lg:block xl:right-[14%]"
-        >
-          <div className="glass-overlay rounded-[26px] px-5 py-4">
-            <ul className="space-y-3">
-              {hero.traits.map((trait) => (
-                <li
-                  key={trait}
-                  className="flex items-center gap-3 text-sm font-bold text-foreground/95"
-                >
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-accent" />
-                  {trait}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
         {/* Portrait */}
         <div
           ref={portraitRef}
@@ -549,6 +520,64 @@ export function Hero() {
               {hero.positioning}
             </p>
           </div>
+        </div>
+      </div>
+
+      {/*
+        Glass cards OUTSIDE the GSAP pin for backdrop-filter.
+        Hidden once hero scroll progresses so they never float over Team/etc.
+      */}
+      <div
+        ref={statsRef}
+        className={`pointer-events-none fixed left-[8%] top-[56%] z-[35] hidden flex-col gap-3.5 xl:left-[10%] ${
+          showHeroOverlay ? "lg:flex" : "!hidden"
+        }`}
+        aria-hidden={!showHeroOverlay}
+      >
+        <div className="glass-hero flex items-center gap-3 rounded-[22px] px-4 py-3.5">
+          <BrandLogo variant="mark" className="h-9 w-9 shrink-0" />
+          <div className="leading-tight">
+            <div className="text-display text-xl font-extrabold tracking-tight text-accent">
+              {hero.stats[0].value}
+              {hero.stats[0].suffix}
+            </div>
+            <div className="text-[12px] font-bold text-foreground/90">
+              {hero.stats[0].label}
+            </div>
+          </div>
+        </div>
+        <div className="glass-hero ml-5 rounded-[22px] px-5 py-4">
+          <div className="text-display text-[2.65rem] font-extrabold leading-none tracking-tight text-accent">
+            {hero.stats[1].value}
+            {hero.stats[1].suffix}
+          </div>
+          <div className="mt-1 text-[12px] font-bold leading-snug text-foreground/90">
+            Years of
+            <br />
+            experience
+          </div>
+        </div>
+      </div>
+
+      <div
+        ref={traitsRef}
+        className={`pointer-events-none fixed right-[8%] top-[56%] z-[35] hidden xl:right-[10%] ${
+          showHeroOverlay ? "lg:block" : "!hidden"
+        }`}
+        aria-hidden={!showHeroOverlay}
+      >
+        <div className="glass-overlay rounded-[26px] px-5 py-4">
+          <ul className="space-y-3">
+            {hero.traits.map((trait) => (
+              <li
+                key={trait}
+                className="flex items-center gap-3 text-sm font-bold text-foreground/95"
+              >
+                <span className="h-2 w-2 shrink-0 rounded-full bg-accent" />
+                {trait}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

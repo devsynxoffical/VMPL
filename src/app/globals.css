@@ -65,8 +65,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-jakarta), system-ui, sans-serif;
-  /* clip avoids ScrollTrigger pin-spacing bugs that overflow-x:hidden causes */
-  overflow-x: clip;
+  /* Do NOT set overflow-x clip/hidden on body — it kills backdrop-filter (glass) */
+  overflow-x: visible;
 }
 
 ::selection {
@@ -89,32 +89,29 @@ body {
   box-shadow: 0 8px 32px rgba(123, 34, 141, 0.08);
 }
 
-.glass-overlay {
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(18px) saturate(1.2);
-  -webkit-backdrop-filter: blur(18px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow:
-    0 10px 36px rgba(123, 34, 141, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
-}
-
-/* Stronger frosted glass for hero stat cards over the portrait */
+/**
+ * Hero frosted glass panels.
+ * Cards are position:fixed OUTSIDE the GSAP pin so backdrop-filter works.
+ */
 .glass-hero {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.22) 48%,
-    rgba(255, 255, 255, 0.28) 100%
-  );
-  backdrop-filter: blur(28px) saturate(1.45);
-  -webkit-backdrop-filter: blur(28px) saturate(1.45);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(123, 34, 141, 0.1),
+    0 12px 40px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.85),
     inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.glass-overlay {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(18px) saturate(1.55);
+  -webkit-backdrop-filter: blur(18px) saturate(1.55);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .text-display {
