@@ -9,38 +9,43 @@ type Props = {
   className?: string;
 };
 
-/** Client portraits + names in a sidebar-logo-style infinite scroller. */
+/** MDM-style square client cards in an infinite horizontal scroller. */
 export function ClientCircleScroller({ reverse = false, className = "" }: Props) {
   const loop = [...featuredClients, ...featuredClients];
 
   return (
     <div
-      className={`client-circle-scroller rounded-[18px] bg-white/70 px-1 py-2.5 ${className}`}
+      className={`client-circle-scroller ${className}`}
       aria-label="Clients we've worked with"
     >
       <div
         className={
-          reverse ? "marquee-track items-end" : "marquee-track items-end"
+          reverse
+            ? "marquee-track items-stretch"
+            : "marquee-track items-stretch"
         }
       >
         {loop.map((client, i) => (
-          <div
+          <article
             key={`${client.image}-${i}`}
-            className="client-circle-item"
+            className="client-card"
             aria-hidden={i >= featuredClients.length}
           >
-            <div className="client-circle-avatar">
+            <div className="client-card-media">
               <Image
                 src={client.image}
                 alt={i < featuredClients.length ? client.name : ""}
-                width={64}
-                height={64}
-                className="h-full w-full object-cover object-top"
-                sizes="64px"
+                fill
+                className="object-cover object-top"
+                sizes="180px"
               />
             </div>
-            <p className="client-circle-name">{client.name}</p>
-          </div>
+            <div className="client-card-body">
+              <h3 className="client-card-name">{client.name}</h3>
+              <p className="client-card-role">{client.role}</p>
+              <p className="client-card-meta">{client.meta}</p>
+            </div>
+          </article>
         ))}
       </div>
     </div>
