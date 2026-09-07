@@ -236,16 +236,16 @@ export function Projects() {
         gsap.set(track, { x: 0, force3D: true });
         syncActive();
 
-        // Hold on card 01 first, then scrub — so early scroll still shows the first card
+        // 1.5x faster horizontal scroll speed
         const tween = gsap.timeline({
           scrollTrigger: {
             trigger: section,
             start: "top top",
             end: () =>
-              `+=${getDistance() + Math.round(window.innerHeight * 0.55)}`,
+              `+=${Math.round((getDistance() + Math.round(window.innerHeight * 0.2)) / 1.5)}`,
             pin: pin,
             pinSpacing: true,
-            scrub: 0.55,
+            scrub: 0.5,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onUpdate: syncActive,
@@ -260,7 +260,7 @@ export function Projects() {
           },
         });
 
-        tween.to({}, { duration: 0.4 });
+        tween.to({}, { duration: 0.15 });
         tween.to(track, {
           x: () => -getDistance(),
           duration: 1,
@@ -367,7 +367,7 @@ export function Projects() {
                 href={project.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="project-card focus-ring group relative isolate flex h-[min(58vh,560px)] w-[clamp(320px,46vw,560px)] shrink-0 flex-col overflow-hidden rounded-[1.75rem] bg-[#161616] lg:h-[min(60vh,600px)] lg:w-[clamp(360px,44vw,580px)] lg:rounded-[2rem]"
+                className="project-card focus-ring group relative isolate flex h-[min(48vh,440px)] w-[clamp(280px,33vw,440px)] shrink-0 flex-col overflow-hidden rounded-[1.4rem] bg-[#161616] lg:h-[min(50vh,470px)] lg:w-[clamp(300px,30vw,460px)] lg:rounded-[1.6rem]"
                 onMouseEnter={() => playProjectVideo(videoRefs.current[index])}
                 onMouseLeave={() => stopProjectVideo(videoRefs.current[index])}
                 onFocus={() => playProjectVideo(videoRefs.current[index])}
@@ -381,15 +381,15 @@ export function Projects() {
                   }}
                 />
 
-                <div className="relative z-10 flex items-start justify-between gap-3 px-4 pt-4 lg:px-5 lg:pt-5">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/40 text-[12px] font-bold tracking-wide text-white backdrop-blur-sm lg:h-11 lg:w-11 lg:text-[13px]">
+                <div className="relative z-10 flex items-start justify-between gap-3 px-3.5 pt-3.5 lg:px-4 lg:pt-4">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 text-[11px] font-bold tracking-wide text-white backdrop-blur-sm lg:h-10 lg:w-10 lg:text-[12px]">
                     {project.index}
                   </span>
                   <div className="flex max-w-[75%] flex-wrap justify-end gap-1.5">
                     {project.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full border border-white/25 bg-black/35 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white/95 backdrop-blur-sm lg:text-[11px]"
+                        className="rounded-full border border-white/25 bg-black/35 px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-white/95 backdrop-blur-sm"
                       >
                         {tag}
                       </span>
@@ -398,18 +398,18 @@ export function Projects() {
                 </div>
 
                 {/* Copy sits on a bottom scrim — no empty purple band */}
-                <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black via-black/80 to-transparent px-4 pb-4 pt-14 lg:px-5 lg:pb-5 lg:pt-16">
-                  <div className="flex items-end gap-3 lg:gap-4">
+                <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black via-black/80 to-transparent px-3.5 pb-3.5 pt-10 lg:px-4 lg:pb-4 lg:pt-12">
+                  <div className="flex items-end gap-3 lg:gap-3.5">
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-display text-[clamp(1.35rem,2.1vw,1.85rem)] font-extrabold leading-tight tracking-tight text-white">
+                      <h3 className="text-display text-[clamp(1.15rem,1.7vw,1.45rem)] font-extrabold leading-tight tracking-tight text-white">
                         {project.name}
                       </h3>
-                      <p className="mt-1 text-[12px] leading-snug text-white/75 lg:text-[13px] lg:leading-relaxed">
+                      <p className="mt-1 text-[11.5px] leading-snug text-white/75 lg:text-[12.5px] lg:leading-snug">
                         {project.description}
                       </p>
                     </div>
                     <span
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-300 lg:h-12 lg:w-12 ${
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-300 lg:h-10 lg:w-10 ${
                         activeIndex === index
                           ? "bg-accent text-white"
                           : "bg-white/15 text-white group-hover:bg-accent"
@@ -426,7 +426,7 @@ export function Projects() {
         </div>
 
         {/* Mobile: vertical stack — same card language */}
-        <div className="mt-10 flex flex-col gap-5 px-4 md:hidden lg:px-[2vw]">
+        <div className="mt-8 flex flex-col gap-4 px-4 md:hidden lg:px-[2vw]">
           {projectsSection.projects.map((project, index) => (
             <a
               key={`m-${project.name}`}
@@ -434,7 +434,7 @@ export function Projects() {
               href={project.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="project-card focus-ring group relative isolate flex min-h-[72vh] w-full flex-col overflow-hidden rounded-[1.75rem] bg-[#111]"
+              className="project-card focus-ring group relative isolate flex min-h-[50vh] max-h-[440px] w-full flex-col overflow-hidden rounded-[1.35rem] bg-[#111]"
               onTouchStart={() =>
                 playProjectVideo(mobileVideoRefs.current[index])
               }

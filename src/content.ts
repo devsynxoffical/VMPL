@@ -425,13 +425,13 @@ export const team = {
       },
       {
         name: "Daniel Brooks",
-        role: "Partnership Development",
+        role: "BDE",
         image: "/team/daniel-brooks.webp",
         bio: "Connecting prospects to the right solution across the VMPL ecosystem.",
       },
       {
         name: "Ethan Carter",
-        role: "Client Acquisition",
+        role: "BDE",
         image: "/team/ethan-carter.webp",
         bio: "Driving outreach and conversations that turn interest into clients.",
       },
@@ -439,19 +439,19 @@ export const team = {
     [
       {
         name: "Frank Miller",
-        role: "Growth Partnerships",
+        role: "BDE",
         image: "/team/frank-miller.webp",
         bio: "Guiding new opportunities from first touch to signed partnership.",
       },
       {
         name: "Jake Wilson",
-        role: "Business Development",
+        role: "BDE",
         image: "/team/jake-wilson.webp",
         bio: "Expanding the pipeline with focused business development.",
       },
       {
         name: "Ryan Cooper",
-        role: "Sales Development",
+        role: "BDE",
         image: "/team/ryan-cooper.webp",
         bio: "Finding and qualifying the next high-fit clients for the team.",
       },

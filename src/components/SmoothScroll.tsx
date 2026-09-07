@@ -14,29 +14,12 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     if (reducedMotion) return;
 
     const lenis = new Lenis({
-      lerp: 0.14,
+      lerp: 0.1,
       smoothWheel: true,
-      wheelMultiplier: 0.9,
+      wheelMultiplier: 0.95,
     });
 
     window.__vmplLenis = lenis;
-
-    ScrollTrigger.scrollerProxy(document.documentElement, {
-      scrollTop(value) {
-        if (typeof value === "number") {
-          lenis.scrollTo(value, { immediate: true });
-        }
-        return lenis.scroll;
-      },
-      getBoundingClientRect() {
-        return {
-          top: 0,
-          left: 0,
-          width: window.innerWidth,
-          height: window.innerHeight,
-        };
-      },
-    });
 
     lenis.on("scroll", () => {
       ScrollTrigger.update();
@@ -53,7 +36,6 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
 
     return () => {
       if (window.__vmplLenis === lenis) delete window.__vmplLenis;
-      ScrollTrigger.scrollerProxy(document.documentElement, {});
       gsap.ticker.remove(ticker);
       lenis.destroy();
     };

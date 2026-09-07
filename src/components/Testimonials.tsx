@@ -15,29 +15,17 @@ import { ClientCircleScroller } from "@/components/ClientCircleScroller";
 
 type Item = (typeof testimonials.items)[number];
 
-function partitionItems(items: readonly Item[]) {
-  const portraits: Item[] = [];
-  const landscapes: Item[] = [];
-  const squares: Item[] = [];
-  for (const item of items) {
-    if (item.height > item.width) portraits.push(item);
-    else if (item.width === item.height) squares.push(item);
-    else landscapes.push(item);
-  }
-  return { portraits, landscapes, squares };
-}
-
 function PlayIcon({ playing }: { playing: boolean }) {
   if (playing) {
     return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+      <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="currentColor" aria-hidden>
         <rect x="6" y="5" width="4" height="14" rx="1" />
         <rect x="14" y="5" width="4" height="14" rx="1" />
       </svg>
     );
   }
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="currentColor" aria-hidden>
       <path d="M8 5.5v13l11-6.5L8 5.5Z" />
     </svg>
   );
@@ -85,12 +73,14 @@ function TestimonialVideoCard({
   index,
   activeId,
   onActivate,
+  aspectRatio = "aspect-video",
   className = "",
 }: {
   item: Item;
   index: number;
   activeId: string | null;
   onActivate: (id: string) => void;
+  aspectRatio?: string;
   className?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -107,8 +97,8 @@ function TestimonialVideoCard({
     if (!el) return;
     const io = new IntersectionObserver(
       ([entry]) =>
-        setInView(entry.isIntersecting && entry.intersectionRatio > 0.28),
-      { threshold: [0, 0.28, 0.55] },
+        setInView(entry.isIntersecting && entry.intersectionRatio > 0.25),
+      { threshold: [0, 0.25, 0.5] },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -154,6 +144,11 @@ function TestimonialVideoCard({
     if (!isActive) {
       onActivate(item.id);
       video.muted = false;
+      try {
+        video.currentTime = 0;
+      } catch {
+        /* ignore seek before loaded */
+      }
       video
         .play()
         .then(() => setPlaying(true))
@@ -169,11 +164,39 @@ function TestimonialVideoCard({
     }
   }, [isActive, item.id, onActivate]);
 
+  const handleMouseEnter = useCallback(() => {
+    setHovered(true);
+    const video = videoRef.current;
+    if (video) {
+      try {
+        video.currentTime = 0;
+      } catch {
+        /* ignore seek before loaded */
+      }
+      video.play().then(() => setPlaying(true)).catch(() => {});
+    }
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHovered(false);
+  }, []);
+
   const toggleMute = useCallback(
     (e: MouseEvent) => {
       e.stopPropagation();
-      if (isActive) onActivate("");
-      else onActivate(item.id);
+      if (isActive) {
+        onActivate("");
+      } else {
+        onActivate(item.id);
+        const video = videoRef.current;
+        if (video) {
+          try {
+            video.currentTime = 0;
+          } catch {}
+          video.muted = false;
+          video.play().then(() => setPlaying(true)).catch(() => {});
+        }
+      }
     },
     [isActive, item.id, onActivate],
   );
@@ -182,13 +205,12 @@ function TestimonialVideoCard({
     <article
       ref={cardRef}
       data-card
-      className={`reveal-hidden group relative w-full overflow-hidden rounded-[1.25rem] border border-foreground/[0.06] bg-[#0b0b0d] shadow-[0_12px_40px_rgba(0,0,0,0.06)] transition-[transform,box-shadow,border-color] duration-500 hover:-translate-y-0.5 hover:border-accent/20 hover:shadow-[0_22px_50px_rgba(230,43,118,0.12)] lg:rounded-[1.4rem] ${className}`}
+      className={`reveal-hidden group relative w-full ${aspectRatio} overflow-hidden rounded-[1.25rem] border border-foreground/[0.08] bg-[#0b0b0d] shadow-[0_12px_36px_rgba(0,0,0,0.12)] transition-[transform,box-shadow,border-color] duration-500 hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-[0_20px_48px_rgba(230,43,118,0.16)] lg:rounded-[1.4rem] ${className}`}
       style={{
-        aspectRatio: `${item.width} / ${item.height}`,
         transitionDelay: `${index * 0.05}s`,
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div
         className={`pointer-events-none absolute inset-0 z-[1] transition-opacity duration-500 ${
@@ -204,8 +226,6 @@ function TestimonialVideoCard({
         ref={videoRef}
         data-testimonial-video
         src={item.src}
-        width={item.width}
-        height={item.height}
         className={`absolute inset-0 h-full w-full ${
           isPortrait ? "object-cover object-top" : "object-cover object-center"
         }`}
@@ -224,7 +244,7 @@ function TestimonialVideoCard({
       <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-black/55 via-transparent to-black/15" />
 
       <div className="absolute left-3 top-3 z-[3] sm:left-3.5 sm:top-3.5">
-        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-black/45 px-2 text-[10px] font-bold tracking-[0.08em] text-white/90 backdrop-blur-md">
+        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-black/50 px-2.5 text-[11px] font-bold tracking-[0.08em] text-white/90 backdrop-blur-md">
           {String(index + 1).padStart(2, "0")}
         </span>
       </div>
@@ -237,7 +257,7 @@ function TestimonialVideoCard({
         <button
           type="button"
           onClick={toggleMute}
-          className="focus-ring flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-white/25"
+          className="focus-ring flex h-8.5 w-8.5 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-white/25 sm:h-9 sm:w-9"
           aria-label={muted ? "Unmute video" : "Mute video"}
         >
           <SoundIcon muted={muted} />
@@ -245,7 +265,7 @@ function TestimonialVideoCard({
         <button
           type="button"
           onClick={togglePlay}
-          className="focus-ring flex h-10 w-10 items-center justify-center rounded-full brand-gradient text-white shadow-[0_8px_24px_rgba(230,43,118,0.35)] transition hover:scale-[1.05]"
+          className="focus-ring flex h-8.5 w-8.5 items-center justify-center rounded-full brand-gradient text-white shadow-[0_6px_20px_rgba(230,43,118,0.35)] transition hover:scale-[1.06] sm:h-9 sm:w-9"
           aria-label={playing ? "Pause video" : "Play video"}
         >
           <PlayIcon playing={playing && inView} />
@@ -266,13 +286,13 @@ function BentoRow({
 }) {
   return (
     <div
-      className={`flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-start lg:gap-5 ${
+      className={`flex flex-col gap-3.5 sm:gap-4 lg:flex-row lg:items-start lg:gap-4.5 ${
         reverse ? "lg:flex-row-reverse" : ""
       }`}
     >
-      {/* ~38% keeps portrait height close to two stacked wides */}
-      <div className="min-w-0 w-full lg:w-[38%] lg:shrink-0">{tall}</div>
-      <div className="flex min-w-0 w-full flex-1 flex-col gap-3 sm:gap-4 lg:gap-5">
+      {/* 38.5% width perfectly matches the combined height of two stacked 16:9 landscape cards */}
+      <div className="min-w-0 w-full lg:w-[38.5%] lg:shrink-0">{tall}</div>
+      <div className="flex min-w-0 w-full flex-1 flex-col gap-3.5 sm:gap-4 lg:gap-4.5">
         {stack}
       </div>
     </div>
@@ -284,51 +304,55 @@ export function Testimonials() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const reducedMotion = useReducedMotion();
 
-  const layout = useMemo(() => {
-    const { portraits, landscapes, squares } = partitionItems(testimonials.items);
-    return {
-      // Tall left, two wides stacked right — fills the portrait’s height
-      row1Tall: portraits[0],
-      row1Stack: [landscapes[0], landscapes[1]].filter(Boolean),
-      // Zigzag flip: wide + square left, tall right
-      row2Stack: [landscapes[2], squares[0]].filter(Boolean),
-      row2Tall: portraits[1],
-      // Anything unexpected still renders
-      rest: [
-        ...portraits.slice(2),
-        ...landscapes.slice(3),
-        ...squares.slice(1),
-      ],
-    };
-  }, []);
-
-  const indexById = useMemo(() => {
-    const map = new Map<string, number>();
-    let i = 0;
-    const order = [
-      layout.row1Tall,
-      ...layout.row1Stack,
-      ...layout.row2Stack,
-      layout.row2Tall,
-      ...layout.rest,
-    ].filter(Boolean) as Item[];
-    for (const item of order) map.set(item.id, i++);
-    return map;
-  }, [layout]);
-
   const onActivate = useCallback((id: string) => {
     setActiveId(id || null);
   }, []);
 
-  const renderCard = (item: Item | undefined) => {
+  const items = testimonials.items;
+
+  // Swapped Video 1 and 3:
+  // Row 1: Portrait 2 (formerly video 3) + Landscape 1 & Landscape 2
+  // Row 2: Landscape 3 & Square 1 + Portrait 1 (formerly video 1)
+  const row1Tall = items.find((i) => i.id === "portrait-2") ?? items[2];
+  const row1Stack = [
+    items.find((i) => i.id === "landscape-1"),
+    items.find((i) => i.id === "landscape-2"),
+  ].filter(Boolean) as Item[];
+
+  const row2Stack = [
+    items.find((i) => i.id === "landscape-3"),
+    items.find((i) => i.id === "square-1"),
+  ].filter(Boolean) as Item[];
+  const row2Tall = items.find((i) => i.id === "portrait-1") ?? items[0];
+
+  const visualOrder = [
+    row1Tall,
+    row1Stack[0],
+    row1Stack[1],
+    row2Stack[0],
+    row2Stack[1],
+    row2Tall,
+  ].filter(Boolean) as Item[];
+
+  const indexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    visualOrder.forEach((item, idx) => map.set(item.id, idx));
+    return map;
+  }, [visualOrder]);
+
+  const renderCard = (
+    item: Item | undefined,
+    aspectRatio: string = "aspect-video",
+  ) => {
     if (!item) return null;
     return (
       <TestimonialVideoCard
         key={item.id}
         item={item}
-        index={indexById.get(item.id) ?? 0}
+        index={indexMap.get(item.id) ?? 0}
         activeId={activeId}
         onActivate={onActivate}
+        aspectRatio={aspectRatio}
       />
     );
   };
@@ -356,20 +380,20 @@ export function Testimonials() {
     );
     observer.observe(section);
     return () => observer.disconnect();
-  }, [reducedMotion, layout]);
+  }, [reducedMotion]);
 
   return (
     <section
       ref={sectionRef}
       id="testimonials"
-      className="relative overflow-hidden py-[8vw] lg:py-[6vw]"
+      className="relative overflow-hidden py-10 sm:py-12 lg:py-16"
     >
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-[45%] bg-[radial-gradient(ellipse_at_top,rgba(230,43,118,0.09),transparent_62%)]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -right-[10%] top-[30%] h-[28rem] w-[28rem] rounded-full opacity-50 blur-3xl"
+        className="pointer-events-none absolute -right-[10%] top-[30%] h-[26rem] w-[26rem] rounded-full opacity-45 blur-3xl"
         style={{
           background:
             "radial-gradient(circle, rgba(123,34,141,0.12), transparent 70%)",
@@ -378,13 +402,13 @@ export function Testimonials() {
       />
 
       <div className="relative z-10 mx-auto max-w-[90rem] px-4 lg:px-[2vw]">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <span className="section-label">{testimonials.label}</span>
-            <h2 className="text-display mt-5 text-[clamp(2rem,4vw,3.25rem)] font-extrabold leading-tight tracking-tight">
+            <h2 className="text-display mt-3.5 text-[clamp(2rem,3.8vw,3.2rem)] font-extrabold leading-tight tracking-tight">
               {testimonials.heading}
             </h2>
-            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted lg:text-base">
+            <p className="mt-2.5 max-w-xl text-[14.5px] leading-relaxed text-muted lg:text-[15.5px]">
               {testimonials.description}
             </p>
           </div>
@@ -393,35 +417,36 @@ export function Testimonials() {
           </p>
         </div>
 
-        <div className="mt-8 lg:mt-10">
+        <div className="mt-7 lg:mt-8">
           <ClientCircleScroller />
         </div>
 
+        {/* Premium, perfectly-aligned Bento Grid */}
         <div
-          className="mt-10 flex flex-col gap-3 sm:gap-4 lg:mt-12 lg:gap-5"
+          className="mx-auto mt-8 flex max-w-5xl flex-col gap-4 sm:gap-4.5 lg:mt-10 lg:gap-5"
           role="region"
           aria-label="Client testimonial videos"
         >
-          {layout.row1Tall && layout.row1Stack.length > 0 && (
-            <BentoRow
-              tall={renderCard(layout.row1Tall)}
-              stack={<>{layout.row1Stack.map((item) => renderCard(item))}</>}
-            />
-          )}
+          {/* Bento Row 1: Tall Portrait Left + Two 16:9 Landscape Videos Right */}
+          <BentoRow
+            tall={renderCard(row1Tall, "aspect-[9/16]")}
+            stack={
+              <>
+                {row1Stack.map((item) => renderCard(item, "aspect-video"))}
+              </>
+            }
+          />
 
-          {layout.row2Tall && layout.row2Stack.length > 0 && (
-            <BentoRow
-              reverse
-              tall={renderCard(layout.row2Tall)}
-              stack={<>{layout.row2Stack.map((item) => renderCard(item))}</>}
-            />
-          )}
-
-          {layout.rest.length > 0 && (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
-              {layout.rest.map((item) => renderCard(item))}
-            </div>
-          )}
+          {/* Bento Row 2 (Zigzag): Two 16:9 Landscape Videos Left + Tall Portrait Right */}
+          <BentoRow
+            reverse
+            tall={renderCard(row2Tall, "aspect-[9/16]")}
+            stack={
+              <>
+                {row2Stack.map((item) => renderCard(item, "aspect-video"))}
+              </>
+            }
+          />
         </div>
       </div>
     </section>

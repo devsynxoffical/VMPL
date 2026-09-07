@@ -30,6 +30,7 @@ function FaqItem({
     >
       <button
         type="button"
+        id={id}
         onClick={onToggle}
         aria-expanded={isOpen}
         aria-controls={answerId}
@@ -66,7 +67,6 @@ function FaqItem({
 }
 
 export function Faq() {
-  const baseId = useId();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const midpoint = Math.ceil(faq.items.length / 2);
   const columns = [faq.items.slice(0, midpoint), faq.items.slice(midpoint)];
@@ -102,7 +102,7 @@ export function Faq() {
                 return (
                   <RevealOnScroll key={item.question} delay={globalIndex * 0.04}>
                     <FaqItem
-                      id={`${baseId}-${globalIndex}`}
+                      id={`faq-item-${globalIndex}`}
                       question={item.question}
                       answer={item.answer}
                       isOpen={openIndex === globalIndex}

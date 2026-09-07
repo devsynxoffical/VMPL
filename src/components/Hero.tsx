@@ -65,18 +65,17 @@ export function Hero() {
       // Phase 1: only VAISHALI. Portrait + chrome stay fully hidden.
       gsap.set(portraitRef.current, {
         opacity: 0,
-        y: 28,
-        scale: 1,
+        y: 20,
+        scale: 0.98,
         visibility: "hidden",
-        filter: "blur(0px)",
       });
       gsap.set(portraitBlurRef.current, { opacity: 0 });
       // Glass cards: opacity only — transforms kill backdrop-filter
       gsap.set(glassEls, { opacity: 0, visibility: "hidden", clearProps: "transform" });
-      gsap.set(motionEls, { opacity: 0, y: 28, visibility: "hidden" });
+      gsap.set(motionEls, { opacity: 0, y: 20, visibility: "hidden" });
       gsap.set(wordmark, {
         opacity: 0,
-        scale: 1.04,
+        scale: 1.03,
         x: 0,
         y: 0,
         xPercent: 0,
@@ -85,44 +84,45 @@ export function Hero() {
 
       const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      // 1) VAISHALI appears in place (no slide)
+      // 1) VAISHALI appears smoothly
       intro.to(
         wordmark,
         {
           opacity: 1,
           scale: 1,
-          duration: 0.9,
+          duration: 0.7,
           ease: "power2.out",
         },
-        0.15,
+        0.05,
       );
 
-      // 2) Portrait + UI — glass cards fade only so frosted blur keeps working
+      // 2) Portrait + UI seamlessly cascades without awkward pause
       const heroContent = [portraitRef.current, ...motionEls].filter(Boolean);
-      intro.set([...heroContent, ...glassEls], { visibility: "visible" }, "+=0.4");
+      intro.set([...heroContent, ...glassEls], { visibility: "visible" }, 0.28);
       intro.to(
         heroContent,
         {
           opacity: 1,
           y: 0,
-          duration: 1,
-          stagger: 0.05,
+          scale: 1,
+          duration: 0.75,
+          stagger: 0.04,
           ease: "power2.out",
         },
-        "<",
+        0.28,
       );
       intro.to(
         glassEls,
         {
           opacity: 1,
-          duration: 1,
-          stagger: 0.05,
+          duration: 0.75,
+          stagger: 0.04,
           ease: "power2.out",
           onComplete: () => {
             gsap.set(glassEls, { clearProps: "transform" });
           },
         },
-        "<",
+        0.28,
       );
 
       return intro;
@@ -189,13 +189,11 @@ export function Hero() {
           y: 0,
           scale: 1,
           opacity: 1,
-          filter: "blur(0px)",
         },
         {
-          y: -160,
-          scale: 1.05,
+          y: -140,
+          scale: 1.03,
           opacity: 0,
-          filter: "blur(16px)",
           duration: 0.42,
           ease: "power2.inOut",
           immediateRender: false,
@@ -206,10 +204,9 @@ export function Hero() {
         portraitBlurRef.current,
         { opacity: 0, y: 0, scale: 1 },
         {
-          opacity: 0.75,
-          y: -50,
-          scale: 1.08,
-          filter: "blur(28px)",
+          opacity: 0.45,
+          y: -40,
+          scale: 1.05,
           duration: 0.35,
           ease: "power2.inOut",
         },
@@ -264,7 +261,7 @@ export function Hero() {
       // Fully clear residual blur so the handoff isn't an empty portrait frame
       tl.to(
         portraitBlurRef.current,
-        { opacity: 0, y: -120, duration: 0.28, ease: "power2.in" },
+        { opacity: 0, y: -100, duration: 0.28, ease: "power2.in" },
         0.4,
       );
       tl.set(portraitRef.current, { visibility: "hidden" }, 0.72);
@@ -356,6 +353,8 @@ export function Hero() {
               src="/vaishali-kapoor.webp"
               alt=""
               fill
+              priority
+              loading="eager"
               className="object-contain object-[center_top] blur-2xl"
               sizes="780px"
               unoptimized
@@ -449,6 +448,7 @@ export function Hero() {
               alt="Vaishali Media Productions"
               fill
               priority
+              loading="eager"
               className="object-contain object-[center_top]"
               sizes="(max-width: 768px) 95vw, 780px"
               unoptimized

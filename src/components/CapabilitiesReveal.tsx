@@ -167,7 +167,7 @@ function CapabilityChip({
         <span className="capa-chip-panel-inner">
           <ChipGlyph id={chip.id} large />
           <span className="capa-chip-panel-title">{chip.title}</span>
-          <p className="capa-chip-panel-copy">{chip.copy}</p>
+          <span className="capa-chip-panel-copy">{chip.copy}</span>
         </span>
       </span>
     </span>
@@ -196,7 +196,7 @@ function LeadWords({ text }: { text: string }) {
 export function CapabilitiesReveal() {
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const leadRef = useRef<HTMLParagraphElement>(null);
+  const leadRef = useRef<HTMLDivElement>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const reducedMotion = useReducedMotion();
 
@@ -290,7 +290,7 @@ export function CapabilitiesReveal() {
           <span className="section-label">{capabilities.label}</span>
         </div>
 
-        <p
+        <div
           ref={leadRef}
           className="capa-lead text-display mt-8 max-w-[36ch] text-center text-[clamp(1.45rem,3.2vw,2.85rem)] font-extrabold leading-[1.28] tracking-[-0.03em] text-foreground sm:max-w-[42ch] lg:mt-10 lg:max-w-[40ch]"
         >
@@ -313,7 +313,7 @@ export function CapabilitiesReveal() {
               </span>
             );
           })}
-        </p>
+        </div>
       </div>
     </section>
   );
