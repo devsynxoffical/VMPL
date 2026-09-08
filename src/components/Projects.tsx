@@ -68,6 +68,9 @@ function ProjectCardMedia({
               controlsList="nodownload nofullscreen noremoteplayback"
               aria-hidden
               tabIndex={-1}
+              onPlay={(e) => {
+                e.currentTarget.playbackRate = 2.2;
+              }}
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
@@ -89,7 +92,10 @@ function playProjectVideo(video: HTMLVideoElement | null) {
   video.defaultMuted = true;
   video.playsInline = true;
   video.loop = true;
+  video.defaultPlaybackRate = 2.2;
+  video.playbackRate = 2.2;
   const run = () => {
+    video.playbackRate = 2.2;
     video.play().catch(() => {});
   };
   if (video.readyState >= 2) run();
