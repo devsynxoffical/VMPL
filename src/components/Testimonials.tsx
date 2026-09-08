@@ -227,7 +227,11 @@ function TestimonialVideoCard({
         data-testimonial-video
         src={item.src}
         className={`absolute inset-0 h-full w-full ${
-          isPortrait ? "object-cover object-top" : "object-cover object-center"
+          isPortrait
+            ? "object-cover object-top"
+            : item.id === "giulia"
+            ? "object-cover object-center scale-[1.02]"
+            : "object-cover object-center"
         }`}
         muted
         loop
@@ -241,23 +245,26 @@ function TestimonialVideoCard({
         aria-label={item.label}
       />
 
-      <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-black/55 via-transparent to-black/15" />
+      {/* Gradient for clear, readable text */}
+      <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-black/90 via-black/35 to-black/25" />
 
-      <div className="absolute left-3 top-3 z-[3] sm:left-3.5 sm:top-3.5">
-        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-black/50 px-2.5 text-[11px] font-bold tracking-[0.08em] text-white/90 backdrop-blur-md">
+      {/* Top badges */}
+      <div className="absolute left-3 top-3 z-[3] flex items-center gap-2 sm:left-3.5 sm:top-3.5">
+        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-black/60 px-2.5 text-[11px] font-bold tracking-[0.08em] text-white/90 backdrop-blur-md ring-1 ring-white/10">
           {String(index + 1).padStart(2, "0")}
         </span>
       </div>
 
+      {/* Top right quick controls */}
       <div
-        className={`absolute bottom-3 right-3 z-[3] flex items-center gap-2 transition-opacity duration-300 sm:bottom-3.5 sm:right-3.5 ${
-          hovered || isActive || !playing ? "opacity-100" : "opacity-0 sm:opacity-80"
+        className={`absolute right-3 top-3 z-[3] flex items-center gap-1.5 transition-opacity duration-300 sm:right-3.5 sm:top-3.5 ${
+          hovered || isActive || !playing ? "opacity-100" : "opacity-0 sm:opacity-85"
         }`}
       >
         <button
           type="button"
           onClick={toggleMute}
-          className="focus-ring flex h-8.5 w-8.5 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-white/25 sm:h-9 sm:w-9"
+          className="focus-ring flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md ring-1 ring-white/10 transition hover:bg-black/80 hover:scale-105 sm:h-8.5 sm:w-8.5"
           aria-label={muted ? "Unmute video" : "Mute video"}
         >
           <SoundIcon muted={muted} />
@@ -265,11 +272,37 @@ function TestimonialVideoCard({
         <button
           type="button"
           onClick={togglePlay}
-          className="focus-ring flex h-8.5 w-8.5 items-center justify-center rounded-full brand-gradient text-white shadow-[0_6px_20px_rgba(230,43,118,0.35)] transition hover:scale-[1.06] sm:h-9 sm:w-9"
+          className="focus-ring flex h-8 w-8 items-center justify-center rounded-full brand-gradient text-white shadow-[0_4px_16px_rgba(230,43,118,0.35)] transition hover:scale-105 sm:h-8.5 sm:w-8.5"
           aria-label={playing ? "Pause video" : "Play video"}
         >
           <PlayIcon playing={playing && inView} />
         </button>
+      </div>
+
+      {/* Bottom overlay card with Name, Role, Result Headline and Metrics */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] p-3.5 sm:p-4 lg:p-4.5">
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <span className="text-[13.5px] font-extrabold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] sm:text-[14.5px]">
+              {item.name}
+            </span>
+            <span className="inline-flex items-center rounded-md bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-white/90 backdrop-blur-md ring-1 ring-white/15 sm:text-[10.5px]">
+              {item.role}
+            </span>
+          </div>
+
+          <p className="line-clamp-2 text-[11.5px] font-medium leading-snug text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] sm:text-[12.5px]">
+            {item.headline}
+          </p>
+
+          {"metric" in item && Boolean(item.metric) && (
+            <div className="mt-0.5 flex items-center gap-1.5">
+              <span className="inline-flex items-center rounded bg-accent/30 px-1.5 py-0.5 text-[9.5px] font-bold tracking-wide text-white drop-shadow sm:text-[10px]">
+                {item.metric}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </article>
   );
@@ -310,20 +343,20 @@ export function Testimonials() {
 
   const items = testimonials.items;
 
-  // Swapped Video 1 and 3:
-  // Row 1: Portrait 2 (formerly video 3) + Landscape 1 & Landscape 2
-  // Row 2: Landscape 3 & Square 1 + Portrait 1 (formerly video 1)
-  const row1Tall = items.find((i) => i.id === "portrait-2") ?? items[2];
+  // Visual layout mapping:
+  // Row 1: Edgar (Portrait 1: #01) + Marie Grace Berg (#02) & Muhammad Ghattas (#03)
+  // Row 2: Giulia (#04) & Edgar-Jeremi (#05) + Mohanded (Portrait 2: #06)
+  const row1Tall = items.find((i) => i.id === "edgar") ?? items[0];
   const row1Stack = [
-    items.find((i) => i.id === "landscape-1"),
-    items.find((i) => i.id === "landscape-2"),
+    items.find((i) => i.id === "marie-grace-berg"),
+    items.find((i) => i.id === "muhammad-ghattas"),
   ].filter(Boolean) as Item[];
 
   const row2Stack = [
-    items.find((i) => i.id === "landscape-3"),
-    items.find((i) => i.id === "square-1"),
+    items.find((i) => i.id === "giulia"),
+    items.find((i) => i.id === "edgar-jeremi"),
   ].filter(Boolean) as Item[];
-  const row2Tall = items.find((i) => i.id === "portrait-1") ?? items[0];
+  const row2Tall = items.find((i) => i.id === "mohanded") ?? items[5];
 
   const visualOrder = [
     row1Tall,
@@ -421,7 +454,7 @@ export function Testimonials() {
           <ClientCircleScroller />
         </div>
 
-        {/* Premium, perfectly-aligned Bento Grid */}
+        {/* Bento Grid */}
         <div
           className="mx-auto mt-8 flex max-w-5xl flex-col gap-4 sm:gap-4.5 lg:mt-10 lg:gap-5"
           role="region"
