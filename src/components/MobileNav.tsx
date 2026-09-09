@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { navItems, navSectionIds, site } from "@/content";
+import { navItems, navSectionIds } from "@/content";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
+import { useContactModal } from "@/context/ContactModalContext";
 import { BrandLogo } from "@/components/BrandLogo";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const activeId = useScrollSpy(navSectionIds);
+  const { openModal } = useContactModal();
 
   useEffect(() => {
     if (!open) return;
@@ -83,9 +85,16 @@ export function MobileNav() {
               paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
             }}
           >
-            <a href={site.bookingLink} className="btn-primary w-full text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                openModal();
+              }}
+              className="btn-primary w-full text-center"
+            >
               Find My Solution
-            </a>
+            </button>
           </div>
         </div>
       )}

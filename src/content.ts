@@ -439,19 +439,19 @@ export const team = {
     [
       {
         name: "Shourya Dahiya",
-        role: "Business Development Lead",
+        role: "Business Development Manager",
         image: "/team/shourya-dahiya.webp",
         bio: "Building relationships and opening doors for new growth partnerships.",
       },
       {
         name: "Daniel Brooks",
-        role: "BDE",
+        role: "Business Development Executive",
         image: "/team/daniel-brooks.webp",
         bio: "Connecting prospects to the right solution across the VMPL ecosystem.",
       },
       {
         name: "Ethan Carter",
-        role: "BDE",
+        role: "Business Development Executive",
         image: "/team/ethan-carter.webp",
         bio: "Driving outreach and conversations that turn interest into clients.",
       },
@@ -459,19 +459,19 @@ export const team = {
     [
       {
         name: "Frank Miller",
-        role: "BDE",
+        role: "Business Development Executive",
         image: "/team/frank-miller.webp",
         bio: "Guiding new opportunities from first touch to signed partnership.",
       },
       {
         name: "Jake Wilson",
-        role: "BDE",
+        role: "Business Development Executive",
         image: "/team/jake-wilson.webp",
         bio: "Expanding the pipeline with focused business development.",
       },
       {
         name: "Ryan Cooper",
-        role: "BDE",
+        role: "Business Development Executive",
         image: "/team/ryan-cooper.webp",
         bio: "Finding and qualifying the next high-fit clients for the team.",
       },

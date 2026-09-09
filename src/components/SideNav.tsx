@@ -5,6 +5,7 @@ import Image from "next/image";
 import { navItems, navSectionIds, site, hero, sidebarClientLogos } from "@/content";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { useHeroScroll } from "@/context/HeroScrollContext";
+import { useContactModal } from "@/context/ContactModalContext";
 import { BrandLogo } from "@/components/BrandLogo";
 import { FacebookIcon, LinkedInIcon } from "@/components/SocialIcons";
 
@@ -136,6 +137,7 @@ function clamp01(n: number) {
 export function SideNav() {
   const activeId = useScrollSpy(navSectionIds);
   const { progress } = useHeroScroll();
+  const { openModal } = useContactModal();
   const [copied, setCopied] = useState(false);
 
   const copyEmail = async () => {
@@ -316,13 +318,14 @@ export function SideNav() {
           </button>
         </div>
 
-        <a
-          href={site.bookingLink}
+        <button
+          type="button"
+          onClick={() => openModal()}
           data-dock="cta"
-          className="rounded-[18px] bg-accent py-3 text-center text-[13px] font-extrabold uppercase tracking-[0.04em] text-white"
+          className="rounded-[18px] bg-accent py-3 text-center text-[13px] font-extrabold uppercase tracking-[0.04em] text-white transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
         >
           Find My Solution
-        </a>
+        </button>
       </div>
     </aside>
   );

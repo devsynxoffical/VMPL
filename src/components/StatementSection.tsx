@@ -5,8 +5,10 @@ import Image from "next/image";
 import { statementSection, site, solutions } from "@/content";
 import { gsap, registerGsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useContactModal } from "@/context/ContactModalContext";
 
 export function StatementSection() {
+  const { openModal } = useContactModal();
   const sectionRef = useRef<HTMLElement>(null);
   const solidRef = useRef<HTMLDivElement>(null);
   const ghostRef = useRef<HTMLDivElement>(null);
@@ -295,8 +297,9 @@ export function StatementSection() {
           </div>
 
           <div className="relative mt-6 grid gap-2.5">
-            <a
-              href={statementSection.cta.href}
+            <button
+              type="button"
+              onClick={() => openModal()}
               className="focus-ring brand-gradient group flex items-center justify-between rounded-2xl px-5 py-4 text-white shadow-[0_12px_32px_rgba(230,43,118,0.28)] transition-transform duration-300 hover:scale-[1.015]"
             >
               <span className="text-[14px] font-extrabold tracking-wide">
@@ -305,7 +308,7 @@ export function StatementSection() {
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-lg transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                 →
               </span>
-            </a>
+            </button>
 
             <button
               type="button"

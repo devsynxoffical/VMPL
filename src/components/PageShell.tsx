@@ -1,6 +1,8 @@
 "use client";
 
 import { HeroScrollProvider } from "@/context/HeroScrollContext";
+import { ContactModalProvider } from "@/context/ContactModalContext";
+import { ContactModal } from "@/components/ContactModal";
 import { SideNav } from "@/components/SideNav";
 import { MobileNav } from "@/components/MobileNav";
 import { Hero } from "@/components/Hero";
@@ -18,23 +20,27 @@ import { MainContent } from "@/components/MainContent";
 export function PageShell() {
   return (
     <HeroScrollProvider>
-      <SmoothScroll>
-        <MobileNav />
-        <SideNav />
-        <main>
-          <Hero />
-          <MainContent>
-            <AboutJourney />
-            <Projects />
-            <CapabilitiesReveal />
-            <Testimonials />
-            <Solutions />
-            <Team />
-            <StatementSection />
-            <Faq />
-          </MainContent>
-        </main>
-      </SmoothScroll>
+      <ContactModalProvider>
+        <SmoothScroll>
+          <MobileNav />
+          <SideNav />
+          <main>
+            <Hero />
+            <MainContent>
+              <AboutJourney />
+              <Projects />
+              <CapabilitiesReveal />
+              <Testimonials />
+              <Solutions />
+              <Team />
+              <StatementSection />
+              <Faq />
+            </MainContent>
+          </main>
+          <ContactModal />
+        </SmoothScroll>
+      </ContactModalProvider>
     </HeroScrollProvider>
   );
 }
+
