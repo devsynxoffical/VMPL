@@ -1,42 +1,13 @@
 import type { NextConfig } from "next";
 
+// Static export for Hostinger (shared hosting): `npm run build` writes the
+// whole site to ./out — upload its contents to public_html.
+// Cache headers live in public/.htaccess (next.config headers() is not
+// supported with static export).
 const nextConfig: NextConfig = {
-  async headers() {
-    return [
-      {
-        source: "/videos/:path*",
-        headers: [
-          { key: "Accept-Ranges", value: "bytes" },
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      {
-        source: "/testimonials/:path*",
-        headers: [
-          { key: "Accept-Ranges", value: "bytes" },
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      {
-        source: "/clients/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      {
-        source: "/team/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      {
-        source: "/vaishali-kapoor.webp",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-    ];
-  },
+  output: "export",
+  trailingSlash: true,
+  images: { unoptimized: true },
 };
 
 export default nextConfig;
