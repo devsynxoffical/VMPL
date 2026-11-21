@@ -1,10 +1,10 @@
 Options -Indexes
 DirectoryIndex index.html index.php
 
-# Force HTTPS
-RewriteEngine On
-RewriteCond %{HTTPS} off
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# Force HTTPS - turn on (remove the #) only AFTER the SSL certificate is active
+# RewriteEngine On
+# RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Custom 404
 ErrorDocument 404 /404.html
