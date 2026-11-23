@@ -1,7 +1,7 @@
 <?php
 // Contact form endpoint for Hostinger (replaces the Next.js /api/contact route).
 // Set LEAD_EMAIL to the inbox that should receive leads.
-const LEAD_EMAIL = 'info@example.com';
+const LEAD_EMAIL = 'info@vaishalimediaproductionsllc.com';
 
 header('Content-Type: application/json');
 

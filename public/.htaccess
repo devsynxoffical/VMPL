@@ -6,6 +6,11 @@ DirectoryIndex index.html index.php
 # RewriteCond %{HTTPS} off
 # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# One canonical host: send vaishalimediaproductionsllc.com to www (avoids duplicate URLs)
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^vaishalimediaproductionsllc\.com$ [NC]
+RewriteRule ^ %{REQUEST_SCHEME}://www.vaishalimediaproductionsllc.com%{REQUEST_URI} [L,R=301]
+
 # Custom 404
 ErrorDocument 404 /404.html
 

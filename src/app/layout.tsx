@@ -10,10 +10,31 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+const SITE_URL = "https://www.vaishalimediaproductionsllc.com";
+const SITE_TITLE = "Vaishali Media Productions LLC | Growth Systems";
+const SITE_DESCRIPTION =
+  "We build what businesses need to grow. Leads, funnels, advertising, creative, and growth systems.";
+
 export const metadata: Metadata = {
-  title: "Vaishali Media Productions LLC | Growth Systems",
-  description:
-    "We build what businesses need to grow. Leads, funnels, advertising, creative, and growth systems.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "Vaishali Media Productions LLC",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [{ url: "/hero.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/hero.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
