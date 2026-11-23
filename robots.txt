@@ -1,0 +1,6 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+
+Host: https://www.vaishalimediaproductionsllc.com
+Sitemap: https://www.vaishalimediaproductionsllc.com/sitemap.xml
